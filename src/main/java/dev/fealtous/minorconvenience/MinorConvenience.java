@@ -1,6 +1,8 @@
 package dev.fealtous.minorconvenience;
 
 import com.mojang.logging.LogUtils;
+import dev.fealtous.minorconvenience.commands.ClientCommands;
+import dev.fealtous.minorconvenience.convenience.ExperimentsHandler;
 import dev.fealtous.minorconvenience.dungeons.DungeonsHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
@@ -38,11 +40,10 @@ public class MinorConvenience
     public static final String MODID = "minorconvenience";
     // Directly reference a slf4j logger
     private static final Logger LOGGER = LogUtils.getLogger();
-    // Create a Deferred Register to hold Blocks which will all be registered under the "examplemod" namespace
-    // Creates a new food item with the id "examplemod:example_id", nutrition 1 and saturation 2
 
     public MinorConvenience()
     {
+
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         // Register the commonSetup method for modloading
@@ -50,10 +51,14 @@ public class MinorConvenience
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(DungeonsHandler.class);
+        MinecraftForge.EVENT_BUS.register(ExperimentsHandler.class);
+        MinecraftForge.EVENT_BUS.register(ClientCommands.class);
 
 
         // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        //ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
+
 }
+

@@ -19,35 +19,6 @@ public class TextUtils {
         return list;
     }
     public static String cleanColorCodes(String t) {
-        StringBuilder stringBuilder = new StringBuilder();
-        char[] cleaned = t.toCharArray();
-        boolean flag = false;
-        for (char c : cleaned) {
-            if ((int) c == 167) {
-                flag = true;
-                continue;
-            }
-            if (flag) {
-                flag = false;
-                continue;
-            }
-            if ((int) c > 20 && (int) c < 127) {
-                stringBuilder.append(c);
-            }
-        }
-        return stringBuilder.toString();
-    }
-    public static String isolateNumbers(String t) {
-        StringBuilder stringBuilder = new StringBuilder();
-        char[] iso = t.toCharArray();
-        for (char c : iso) {
-            if (c >= 0x30 && c <= 0x39) {
-                stringBuilder.append(c);
-            }
-        }
-        return stringBuilder.toString();
-    }
-    public static String cleanItemName(Slot s) {
-        return cleanColorCodes(s.getItem().getDisplayName().getString());
+        return t.replaceAll("[^a-zA-Z0-9;',.!?\\s]","");
     }
 }
