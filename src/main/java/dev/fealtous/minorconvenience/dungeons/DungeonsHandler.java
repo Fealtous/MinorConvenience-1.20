@@ -8,24 +8,33 @@ import dev.fealtous.minorconvenience.utils.RenderUtils;
 import dev.fealtous.minorconvenience.utils.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Blaze;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.MapItem;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.gui.overlay.GuiOverlayManager;
+import net.minecraftforge.client.gui.overlay.NamedGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import oshi.util.tuples.Pair;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,6 +43,7 @@ public class DungeonsHandler {
     private static final Minecraft mc = Minecraft.getInstance();
     private static LinkedList<Entity> blazes = new LinkedList<>();
     private static boolean blazeSolverActive = false;
+    private static boolean inDungeons = false;
     private static int blazeLoc = -1;
     private static String component = null;
 
@@ -42,6 +52,7 @@ public class DungeonsHandler {
     public static void passiveChecker(TickEvent.ClientTickEvent e) {
         if (!e.phase.equals(TickEvent.Phase.START)) return;
         if (mc.level == null || ++ticks % 10 != 0) return;
+        inDungeons = isDungeons();
         if (!blazeSolverActive) {
             var list = TextUtils.getPlayerNameList();
             for (int i = 0; i < list.size(); i++) {
@@ -57,13 +68,14 @@ public class DungeonsHandler {
         }
         if (blazeSolverActive && ticks % 30 == 0) {
             if (blazes.isEmpty() && TextUtils.getPlayerNameList().get(blazeLoc).equals(component)) registerBlazes(getBlazes());
+            else blazeSolverActive = false;
         }
 
     }
 
     @SubscribeEvent
     public static void renderBlazeBounding(RenderLevelStageEvent e) {
-        if (!blazes.isEmpty() && isDungeons()) {
+        if (!blazes.isEmpty() && inDungeons) {
             if (e.getStage().equals(RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS)) {
                 PoseStack ps = e.getPoseStack();
                 Player p = mc.player;
@@ -95,7 +107,7 @@ public class DungeonsHandler {
 
 
     public static void registerBlazes(List<Blaze> availableBlazes) {
-        if (!isDungeons()) return;
+        if (inDungeons) return;
         Minecraft mc = Minecraft.getInstance();
         var tmpBlazes = new LinkedList<Pair<Entity, Entity>>();
         //10 blazes per puzzle
@@ -124,8 +136,8 @@ public class DungeonsHandler {
             "The reward isn't in any of our chests", "Both of them are telling the truth."};
     @SubscribeEvent
     public static void threeWierdosSolver(ClientChatReceivedEvent e) {
-        if (!isDungeons()) return;
-        String message = TextUtils.cleanColorCodes(e.getMessage().getString());
+        if (inDungeons) return;
+        String message = e.getMessage().getString().replaceAll("[^a-zA-Z,.!'\\s]","");
         if (!message.contains("NPC")) return;
         for (String s : weirdoYes) {
             if (message.contains(s)) {
@@ -161,12 +173,75 @@ public class DungeonsHandler {
             var split = title.split("'");
             InventoryHelper.chestInventory(currentScreen).forEach((x) -> {
                 if (x.hasItem() && x.getItem().getDisplayName().getString().startsWith(split[1])) {
-                    RenderUtils.slotHighlight(e.getGuiGraphics(), ((ContainerScreen) currentScreen), x.x, x.y, RenderUtils.COLOR_STANDARD);
+                    RenderUtils.slotHighlight(e.getGuiGraphics(), ((ContainerScreen) currentScreen), x.x, x.y, RenderUtils.HIGHLIGHT);
                 }
             });
         }
     }
+    static HashMap<MapDecoration, PlayerInfo> playerHeadsToRender = new HashMap<>();
+    static int tickTimer = 300;
+    static final NamedGuiOverlay overlayNo = GuiOverlayManager.getOverlays().get(25);
+    static final NamedGuiOverlay overlayYes = GuiOverlayManager.getOverlays().get(0);
+    @SubscribeEvent
+    public static void mapRender(RenderGuiOverlayEvent.Post e) {
+        if (!inDungeons) {
+            if (!playerHeadsToRender.isEmpty()) playerHeadsToRender.clear();
+            tickTimer = 300;
+            return;
+        }
+        if (!(e.getOverlay().equals(overlayNo) || e.getOverlay().equals(overlayYes))) return;
 
+        var mapItemstack = ((Inventory) Minecraft.getInstance().player.inventoryMenu.slots.get(45).container).items.get(8);
+        var mapItem = mapItemstack.getItem();
+
+        if (mapItem instanceof MapItem) {
+            var mc = Minecraft.getInstance();
+            var buffer = mc.renderBuffers().bufferSource();
+            var pose = e.getGuiGraphics().pose();
+            int mapId = MapItem.getMapId(mapItemstack);
+            var mapdata = MapItem.getSavedData(mapId, mc.level);
+
+            if (tickTimer-- == 0) {
+                var playerInfos = Minecraft.getInstance().player.connection.getListedOnlinePlayers();
+                var players = Minecraft.getInstance().level.players();
+                playerInfos.forEach((playerInfo -> {
+                    for (AbstractClientPlayer player : players) {
+
+                    }
+                }));
+                TextUtils.sendIngameMessage(players.get(0).getName().getString());
+                tickTimer = 300;
+            }
+
+            double screenRelationX = 960.0 / 1920.0;
+            double translationX = screenRelationX * mc.getWindow().getWidth();
+            double screenRelationY = 0.5f;
+            int offset = 5;
+            float scale = 1.5f; // todo add config scaling
+            if (e.getOverlay().equals(GuiOverlayManager.getOverlays().get(0))) {
+                pose.pushPose();
+                pose.translate(translationX - MapItem.IMAGE_WIDTH - offset, offset, 0);
+                mc.gameRenderer.getMapRenderer().render(pose,
+                        buffer,
+                        mapId,
+                        mapdata,
+                        true,
+                        mc.getEntityRenderDispatcher().getPackedLightCoords(mc.player, e.getPartialTick()));
+                pose.popPose();
+            }
+
+            if (e.getOverlay().equals(GuiOverlayManager.getOverlays().get(25))) {
+                pose.pushPose();
+                playerHeadsToRender.forEach((deco, player) -> {
+                    int xpos = (deco.getX() + 128) / 2;
+                    int ypos = (deco.getY() + 128) / 2;
+                    PlayerFaceRenderer.draw(e.getGuiGraphics(), player.getSkinLocation(), (int) (translationX - MapItem.IMAGE_WIDTH + xpos - 10), ypos - 4, 8);
+                });
+                pose.popPose();
+            }
+        }
+
+    }
 
     public static void chestRender(ScreenEvent.Render.Post e) {
         var currentScreen = e.getScreen();

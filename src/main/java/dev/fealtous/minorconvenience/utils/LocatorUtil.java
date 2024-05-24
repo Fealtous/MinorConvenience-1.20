@@ -31,7 +31,7 @@ public class LocatorUtil {
             PlayerTeam team = sideBar.getPlayersTeam(s.getOwner());
             Component pnamecomponent = Component.literal(s.getOwner());
             if (team == null) continue;
-            String sbtext = TextUtils.cleanColorCodes(PlayerTeam.formatNameForTeam(team, pnamecomponent).getString());
+            String sbtext = (PlayerTeam.formatNameForTeam(team, pnamecomponent).getString());
             if (sbtext.contains("Catacombs")) return LOCATIONS.CATACOMBS;
             if (sbtext.contains("Your Island")) return LOCATIONS.ISLAND;
             if (sbtext.contains("Divan's")) return LOCATIONS.DWARVEN;

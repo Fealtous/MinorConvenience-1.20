@@ -3,6 +3,7 @@ package dev.fealtous.minorconvenience.utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.Slot;
 
 import java.util.LinkedList;
@@ -18,7 +19,8 @@ public class TextUtils {
         }
         return list;
     }
-    public static String cleanColorCodes(String t) {
-        return t.replaceAll("[^a-zA-Z0-9;',.!?\\s]","");
+    public static void sendIngameMessage(String text) {
+        Minecraft.getInstance().player.sendSystemMessage(Component.literal(text));
     }
+
 }
