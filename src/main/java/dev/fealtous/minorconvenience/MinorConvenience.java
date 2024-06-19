@@ -7,12 +7,16 @@ import dev.fealtous.minorconvenience.convenience.ExperimentsHandler;
 import dev.fealtous.minorconvenience.convenience.KeyBindingHandlers;
 import dev.fealtous.minorconvenience.convenience.WaypointsHandler;
 import dev.fealtous.minorconvenience.dungeons.DungeonsHandler;
+import dev.fealtous.minorconvenience.mining.MiningHandler;
+import dev.fealtous.minorconvenience.utils.LocatorUtil;
+import dev.fealtous.minorconvenience.utils.network.CustomReader;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.network.ConnectionStartEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 
@@ -24,7 +28,7 @@ public class MinorConvenience
     public static final String MODID = "minorconvenience";
     // Directly reference a slf4j logger
     private static final Logger LOGGER = LogUtils.getLogger();
-
+    private static int timer = 0;
     public MinorConvenience()
     {
 
@@ -33,6 +37,8 @@ public class MinorConvenience
         MinecraftForge.EVENT_BUS.register(ExperimentsHandler.class);
         MinecraftForge.EVENT_BUS.register(ClientCommands.class);
         MinecraftForge.EVENT_BUS.register(WaypointsHandler.class);
+        MinecraftForge.EVENT_BUS.register(new CustomReader());
+        MinecraftForge.EVENT_BUS.register(MiningHandler.class);
         MinecraftForge.EVENT_BUS.register(ChatHandler.class);
 
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -45,6 +51,13 @@ public class MinorConvenience
         e.register(KeyBindingHandlers.COPY_TOGGLE);
     }
 
-
+    public void clientTickManager(TickEvent.ClientTickEvent e) {
+        if (!e.phase.equals(TickEvent.Phase.START)) return;
+        timer++;
+        if (timer % 15 == 0) {
+            LocatorUtil.update();
+            DungeonsHandler.passiveCheck();
+        }
+    }
 }
 

@@ -4,6 +4,8 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.fealtous.minorconvenience.convenience.WaypointsHandler;
 import dev.fealtous.minorconvenience.dungeons.DungeonsHandler;
+import dev.fealtous.minorconvenience.utils.LocatorUtil;
+import dev.fealtous.minorconvenience.utils.network.CustomReader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.commands.Commands;
@@ -42,10 +44,30 @@ public class ClientCommands {
                     Minecraft.getInstance().player.sendSystemMessage(Component.literal("deleted waypoint"));
                     return Command.SINGLE_SUCCESS;
                 })));
+        e.getDispatcher().register(Commands.literal("coords")
+                .executes((ctx) -> {
+                    sayPosition();
+                    return Command.SINGLE_SUCCESS;
+                }));
+        e.getDispatcher().register(Commands.literal("pfilter")
+                .then(Commands.argument("class", StringArgumentType.word()).executes((ctx) -> {
+                    CustomReader.exclusions.add(StringArgumentType.getString(ctx, "class"));
+                    CustomReader.rcvd.clear();
+                    return Command.SINGLE_SUCCESS;
+                }))
+
+        );
+
     }
 
     private static Optional<UUID> optionalUUIDOf(String player) {
         Optional<AbstractClientPlayer> p = Minecraft.getInstance().level.players().stream().filter((x) -> x.getDisplayName().getString().equals(player)).findFirst();
         return p.map(Entity::getUUID);
+    }
+
+    private static void sayPosition() {
+        var pos = Minecraft.getInstance().player.position();
+        var loc = LocatorUtil.whereAmI().name();
+        Minecraft.getInstance().player.connection.sendChat(String.format("x:%.0f y:%.0f z:%.0f @ %s", pos.x, pos.y, pos.z, loc));
     }
 }
