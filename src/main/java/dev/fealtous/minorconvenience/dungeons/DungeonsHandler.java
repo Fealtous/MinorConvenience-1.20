@@ -2,57 +2,43 @@ package dev.fealtous.minorconvenience.dungeons;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.fealtous.minorconvenience.utils.InventoryHelper;
-import dev.fealtous.minorconvenience.utils.LocatorUtil;
 import dev.fealtous.minorconvenience.utils.RenderUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
-import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Blaze;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.MapItem;
-import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.client.gui.overlay.GuiOverlayManager;
-import net.minecraftforge.client.gui.overlay.NamedGuiOverlay;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import oshi.util.tuples.Pair;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
-import static dev.fealtous.minorconvenience.utils.Location.CATACOMBS;
+import static dev.fealtous.minorconvenience.utils.LocatorUtil.isDungeons;
 import static dev.fealtous.minorconvenience.utils.RegexUtils.blazeHealthPattern;
 
 public class DungeonsHandler {
-
+    private static final Map<String, Double> scalarMap = new HashMap<>();
     private static final Minecraft mc = Minecraft.getInstance();
     private static LinkedList<Entity> blazes = new LinkedList<>();
-
-    public static void passiveCheck() {
+    public static void alert() {
         if (isDungeons()) {
             var b = getBlazes();
             for (Blaze blaze : b) {
-                // Turn on blaze solver IF there is a blaze nearby.
-                if (blaze.position().distanceTo(mc.player.position()) < 15) {
-                    registerBlazes(b);
-                    return;
-                } else {
+                if (blaze.position().distanceTo(mc.player.position()) < 30) {
                     blazes.clear();
+                    registerBlazes(b);
+                    break;
                 }
             }
+
         }
     }
 
@@ -66,11 +52,16 @@ public class DungeonsHandler {
                 RenderUtils.renderRelativeToPlayer(ps, p);
                 MultiBufferSource.BufferSource rb = mc.renderBuffers().bufferSource();
                 VertexConsumer vc = rb.getBuffer(RenderType.LINES);
-                if (blazes.size() != 1) {
-                    LevelRenderer.renderLineBox(ps, vc, blazes.getFirst().getBoundingBox(), 1, 0, 0, 1);
-                    LevelRenderer.renderLineBox(ps, vc, blazes.getLast().getBoundingBox(), 0, 1, 0, 1);
-                } else {
-                    LevelRenderer.renderLineBox(ps, vc, blazes.get(0).getBoundingBox(), 1, 1, 1, 1);
+                try {
+                    if (blazes.size() <= 0) return;
+                    if (blazes.size() != 1) {
+                        LevelRenderer.renderLineBox(ps, vc, blazes.getFirst().getBoundingBox(), 1, 0, 0, 1);
+                        LevelRenderer.renderLineBox(ps, vc, blazes.getLast().getBoundingBox(), 0, 1, 0, 1);
+                    } else {
+                        LevelRenderer.renderLineBox(ps, vc, blazes.get(0).getBoundingBox(), 1, 1, 1, 1);
+                    }
+                } catch (Exception e1) {
+                    blazes.clear();
                 }
                 ps.popPose();
                 rb.endBatch(RenderType.LINES);
@@ -83,9 +74,7 @@ public class DungeonsHandler {
     public static void onBlazeDeath(LivingDeathEvent e) {
         blazes.remove(e.getEntity());
     }
-    private static boolean isDungeons() {
-        return LocatorUtil.whereAmI().equals(CATACOMBS);
-    }
+
 
     public static void registerBlazes(List<Blaze> availableBlazes) {
         if (!isDungeons()) return;
@@ -123,31 +112,24 @@ public class DungeonsHandler {
             "My chest doesn't have the reward. We are all telling the truth", "My chest has the reward and I'm telling the truth",
             "The reward isn't in any of our chests", "Both of them are telling the truth."};
     @SubscribeEvent
-    public static void threeWierdosSolver(ClientChatReceivedEvent e) {
-        if (!isDungeons()) return;
-        String message = e.getMessage().getString().replaceAll("[^a-zA-Z,.!'\\s]","");
-        if (!message.contains("NPC")) return;
-        for (String s : weirdoYes) {
-            if (message.contains(s)) {
-                MutableComponent component = (MutableComponent) e.getMessage();
-                component.setStyle(e.getMessage().getStyle().withColor(0xff0000));
-                component.getSiblings().forEach((i) -> {
-                    ((MutableComponent) i).setStyle(e.getMessage().getStyle().withColor(0xff0000));
-                });
-                e.setMessage(component);
-                break;
+    public static void threeWeirdos(ClientChatReceivedEvent.System e) {
+        if (e.isOverlay()) return;
+        if (isDungeons()) {
+            String message = e.getMessage().getString().replaceAll("[^a-zA-Z,.!'\\s]","");
+            if (message.contains("NPC")) {
+                for (String s : weirdoYes) {
+                    if (message.contains(s)) {
+                        MutableComponent component = (MutableComponent) e.getMessage();
+                        component.setStyle(e.getMessage().getStyle().withColor(0x00ff00));
+                        component.getSiblings().forEach((i) -> {
+                            ((MutableComponent) i).setStyle(e.getMessage().getStyle().withColor(0x00ff00));
+                        });
+                        e.setMessage(component);
+                        break;
+                    }
+                }
             }
         }
-    }
-    private static List<Blaze> getBlazes() {
-        var availableBlazes = new LinkedList<Blaze>();
-        Minecraft.getInstance().level.entitiesForRendering().forEach((x) -> {
-            if (x instanceof Blaze && !blazes.contains(x)) availableBlazes.add((Blaze) x);
-        });
-        return availableBlazes;
-    }
-    public static void resetBlazes() {
-        blazes.clear();
     }
 
     @SubscribeEvent
@@ -164,85 +146,14 @@ public class DungeonsHandler {
             });
         }
     }
-    static HashMap<MapDecoration, PlayerInfo> playerHeadsToRender = new HashMap<>();
-    static int tickTimer = 300;
-    static final NamedGuiOverlay overlayNo = GuiOverlayManager.getOverlays().get(25);
-    static final NamedGuiOverlay overlayYes = GuiOverlayManager.getOverlays().get(0);
-    static final int HOTBAR_LAST = 8;
-    @SubscribeEvent
-    public static void mapRender(RenderGuiOverlayEvent.Post e) {
-        /*if (true) {
-            if (!playerHeadsToRender.isEmpty()) playerHeadsToRender.clear();
-            tickTimer = 300;
-            return;
-        }*/
-        // Wait what the fuck did I do this for?
-        // It should be if YES, render... whatever
-
-        if (!e.getOverlay().equals(overlayYes)) return;
-
-        var mapItemstack = ((Inventory) Minecraft.getInstance().player.inventoryMenu.slots.get(45).container).items.get(HOTBAR_LAST);
-        var mapItem = mapItemstack.getItem();
-
-
-        if (mapItem instanceof MapItem) {
-            var mc = Minecraft.getInstance();
-            var buffer = mc.renderBuffers().bufferSource();
-            var pose = e.getGuiGraphics().pose();
-            int mapId = MapItem.getMapId(mapItemstack);
-            var mapdata = MapItem.getSavedData(mapId, mc.level);
-
-            if (tickTimer-- == 0) {
-                for (PlayerInfo listedOnlinePlayer : mc.player.connection.getListedOnlinePlayers()) {
-                    var str = mc.gui.getTabList().getNameForDisplay(listedOnlinePlayer).getString();
-                    //if (str.matches(".*\\[\\d+].+\\()")) {
-                        //System.out.println(str);
-                    //}
-                    //mc.level.getEntity()
-                    //listedOnlinePlayer.getProfile().getId()
-                }
-
-
-                tickTimer = 300;
-            }
-
-            double screenRelationX = 960.0 / 1920.0;
-            double translationX = screenRelationX * mc.getWindow().getWidth();
-            double screenRelationY = 0.5f;
-            int offset = 5;
-            float scale = 1.5f; // todo add config scaling
-            if (e.getOverlay().equals(GuiOverlayManager.getOverlays().get(0))) {
-                pose.pushPose();
-                pose.translate(translationX - MapItem.IMAGE_WIDTH - offset, offset, 0);
-                mc.gameRenderer.getMapRenderer().render(pose,
-                        buffer,
-                        mapId,
-                        mapdata,
-                        true,
-                        mc.getEntityRenderDispatcher().getPackedLightCoords(mc.player, e.getPartialTick()));
-                pose.popPose();
-            }
-
-            if (e.getOverlay().equals(GuiOverlayManager.getOverlays().get(25))) {
-                pose.pushPose();
-                playerHeadsToRender.forEach((deco, player) -> {
-                    int xpos = (deco.x() + 128) / 2;
-                    int ypos = (deco.y() + 128) / 2;
-                    PlayerFaceRenderer.draw(e.getGuiGraphics(), player.getSkin(), (int) (translationX - MapItem.IMAGE_WIDTH + xpos - 10), ypos - 4, 8);
-                });
-                pose.popPose();
-            }
-        }
-
-    }
-
-    public static void chestRender(ScreenEvent.Render.Post e) {
-        var currentScreen = e.getScreen();
-        if (!InventoryHelper.isChestScreen(currentScreen)) return;
-        List<Slot> slots = InventoryHelper.chestInventory(currentScreen);
-        slots.forEach((x) -> {
-            if (x.hasItem()) RenderUtils.slotHighlight(e.getGuiGraphics(), (ContainerScreen) currentScreen,
-                    x.x, x.y, RenderUtils.COLOR_STANDARD);
+    private static List<Blaze> getBlazes() {
+        var availableBlazes = new LinkedList<Blaze>();
+        Minecraft.getInstance().level.entitiesForRendering().forEach((x) -> {
+            if (x instanceof Blaze && !blazes.contains(x)) availableBlazes.add((Blaze) x);
         });
+        return availableBlazes;
+    }
+    public static void resetBlazes() {
+        blazes.clear();
     }
 }

@@ -5,7 +5,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraftforge.event.network.ConnectionStartEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -23,6 +25,7 @@ public class CustomReader extends SimpleChannelInboundHandler<Packet> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Packet msg) throws Exception {
         var name = msg.getClass().getSimpleName();
+        // Reduce log spam, shouldn't cause any issues?
         if (msg instanceof ClientboundPlayerInfoUpdatePacket pkt) {
             if (pkt.actions().contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LATENCY)) {
                 return;

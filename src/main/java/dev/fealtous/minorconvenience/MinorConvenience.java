@@ -6,14 +6,15 @@ import dev.fealtous.minorconvenience.convenience.ChatHandler;
 import dev.fealtous.minorconvenience.convenience.ExperimentsHandler;
 import dev.fealtous.minorconvenience.convenience.KeyBindingHandlers;
 import dev.fealtous.minorconvenience.convenience.WaypointsHandler;
+import dev.fealtous.minorconvenience.dungeons.DungeonMapRenderer;
 import dev.fealtous.minorconvenience.dungeons.DungeonsHandler;
 import dev.fealtous.minorconvenience.mining.MiningHandler;
 import dev.fealtous.minorconvenience.utils.LocatorUtil;
 import dev.fealtous.minorconvenience.utils.network.CustomReader;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.network.ConnectionStartEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -40,6 +41,7 @@ public class MinorConvenience
         MinecraftForge.EVENT_BUS.register(new CustomReader());
         MinecraftForge.EVENT_BUS.register(MiningHandler.class);
         MinecraftForge.EVENT_BUS.register(ChatHandler.class);
+        MinecraftForge.EVENT_BUS.register(DungeonMapRenderer.class);
 
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::registerClientShit);
@@ -51,12 +53,15 @@ public class MinorConvenience
         e.register(KeyBindingHandlers.COPY_TOGGLE);
     }
 
+    @SubscribeEvent
     public void clientTickManager(TickEvent.ClientTickEvent e) {
-        if (!e.phase.equals(TickEvent.Phase.START)) return;
+        if (!e.phase.equals(TickEvent.Phase.START) || Minecraft.getInstance().level == null) return;
         timer++;
         if (timer % 15 == 0) {
-            LocatorUtil.update();
-            DungeonsHandler.passiveCheck();
+            LocatorUtil.alert();
+            DungeonsHandler.alert();
+            MiningHandler.alert();
+            DungeonMapRenderer.alert();
         }
     }
 }

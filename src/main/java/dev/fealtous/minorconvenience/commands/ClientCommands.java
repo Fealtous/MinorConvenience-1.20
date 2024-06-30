@@ -3,6 +3,7 @@ package dev.fealtous.minorconvenience.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.fealtous.minorconvenience.convenience.WaypointsHandler;
+import dev.fealtous.minorconvenience.dungeons.DungeonMapRenderer;
 import dev.fealtous.minorconvenience.dungeons.DungeonsHandler;
 import dev.fealtous.minorconvenience.utils.LocatorUtil;
 import dev.fealtous.minorconvenience.utils.network.CustomReader;
@@ -49,12 +50,11 @@ public class ClientCommands {
                     sayPosition();
                     return Command.SINGLE_SUCCESS;
                 }));
-        e.getDispatcher().register(Commands.literal("pfilter")
-                .then(Commands.argument("class", StringArgumentType.word()).executes((ctx) -> {
-                    CustomReader.exclusions.add(StringArgumentType.getString(ctx, "class"));
-                    CustomReader.rcvd.clear();
+        e.getDispatcher().register(Commands.literal("mapretry")
+                .executes((ctx) -> {
+                    DungeonMapRenderer.setMapSize();
                     return Command.SINGLE_SUCCESS;
-                }))
+                })
 
         );
 
