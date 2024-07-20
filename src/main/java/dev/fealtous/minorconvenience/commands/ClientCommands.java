@@ -1,10 +1,10 @@
 package dev.fealtous.minorconvenience.commands;
 
-import com.mojang.brigadier.Command;
+
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.fealtous.minorconvenience.convenience.WaypointsHandler;
-import dev.fealtous.minorconvenience.dungeons.DungeonMapRenderer;
-import dev.fealtous.minorconvenience.dungeons.DungeonsHandler;
+import dev.fealtous.minorconvenience.dungeons.*;
 import dev.fealtous.minorconvenience.utils.LocatorUtil;
 import dev.fealtous.minorconvenience.utils.network.CustomReader;
 import net.minecraft.client.Minecraft;
@@ -19,6 +19,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class ClientCommands {
     @SubscribeEvent
@@ -27,37 +28,75 @@ public class ClientCommands {
             DungeonsHandler.resetBlazes();
             Minecraft.getInstance().player.sendSystemMessage(Component.literal("Successfully reset blazes."));
 
-            return Command.SINGLE_SUCCESS;
+            return SINGLE_SUCCESS;
         }));
 
         e.getDispatcher().register(Commands.literal("lookup")
-                .then(Commands.argument("playername", EntityArgument.player()).executes(ctx -> {
-                    Minecraft.getInstance().player.sendSystemMessage(Component.literal("Looking up " + EntityArgument.getPlayer(ctx, "playername").getUUID()));
-                    return Command.SINGLE_SUCCESS;
+                .then(Commands.argument("playername", StringArgumentType.string())
+                        .executes(ctx -> {
+                            var pname = ctx.getArgument("playername", String.class);
+                            Minecraft.getInstance().player.sendSystemMessage(Component.literal("Looking up " + pname));
+                            return SINGLE_SUCCESS;
                 })));
 
         e.getDispatcher().register(Commands.literal("waypoint")
                 .then(Commands.literal("create").executes((ctx) -> {
                     WaypointsHandler.addWP(ctx.getSource().getEntity().getOnPos(), "test");
-                    return Command.SINGLE_SUCCESS;
+                    return SINGLE_SUCCESS;
                 }))
                 .then(Commands.literal("delete").executes((ctx) -> {
                     Minecraft.getInstance().player.sendSystemMessage(Component.literal("deleted waypoint"));
-                    return Command.SINGLE_SUCCESS;
+                    return SINGLE_SUCCESS;
                 })));
         e.getDispatcher().register(Commands.literal("coords")
                 .executes((ctx) -> {
                     sayPosition();
-                    return Command.SINGLE_SUCCESS;
+                    return SINGLE_SUCCESS;
                 }));
-        e.getDispatcher().register(Commands.literal("mapretry")
+        e.getDispatcher().register(Commands.literal("readPos")
                 .executes((ctx) -> {
-                    DungeonMapRenderer.setMapSize();
-                    return Command.SINGLE_SUCCESS;
-                })
+                    DungeonRoomIdentifier.identifyRoom();
+                    return SINGLE_SUCCESS;
+                }));
 
+        e.getDispatcher().register(Commands.literal("secret")
+                .then(Commands.literal("start")
+                        .then(Commands.argument("roomName", StringArgumentType.string())
+                                .executes(ctx -> {
+                                    RoomDefiner.create(ctx.getArgument("roomName", String.class), DungeonRoomIdentifier.currentRoomHash);
+                                    return SINGLE_SUCCESS;
+                                })))
+                .then(Commands.literal("build")
+                        .executes(ctx -> {
+                            RoomDefiner.build();
+                            return SINGLE_SUCCESS;
+                        }))
+                .then(Commands.literal("solved")
+                        .then(Commands.argument("hash", IntegerArgumentType.integer())
+                                .executes(ctx -> {
+                                    RoomDefiner.solveVia(ctx.getArgument("hash", Integer.class));
+                                    return SINGLE_SUCCESS;
+                                })))
+                .then(Commands.literal("load")
+                        .executes(ctx -> {
+                            RoomDefiner.load();
+                            return SINGLE_SUCCESS;
+                        }))
+                .then(Commands.literal("save")
+                        .executes(ctx -> {
+                            RoomDefiner.save();
+                            return SINGLE_SUCCESS;
+                        }))
         );
-
+        var secretCmd = Commands.literal("ss");
+        for (POIType value : POIType.values()) {
+            secretCmd = secretCmd.then(Commands.literal(value.name().toLowerCase())
+                    .executes(ctx -> {
+                        RoomDefiner.addPOI(value);
+                        return SINGLE_SUCCESS;
+                    }));
+        }
+        e.getDispatcher().register(secretCmd);
     }
 
     private static Optional<UUID> optionalUUIDOf(String player) {

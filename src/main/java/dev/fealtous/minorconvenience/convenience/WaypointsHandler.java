@@ -1,7 +1,6 @@
 package dev.fealtous.minorconvenience.convenience;
 
 import dev.fealtous.minorconvenience.utils.Location;
-import dev.fealtous.minorconvenience.utils.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.core.BlockPos;

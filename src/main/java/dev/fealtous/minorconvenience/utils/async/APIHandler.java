@@ -1,4 +1,4 @@
-package dev.fealtous.minorconvenience.utils;
+package dev.fealtous.minorconvenience.utils.async;
 
 public class APIHandler {
     private boolean processing;

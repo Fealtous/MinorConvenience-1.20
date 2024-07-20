@@ -3,10 +3,9 @@ package dev.fealtous.minorconvenience.mining;
 
 import dev.fealtous.minorconvenience.utils.Location;
 import dev.fealtous.minorconvenience.utils.LocatorUtil;
-import dev.fealtous.minorconvenience.utils.RenderUtils;
+import dev.fealtous.minorconvenience.utils.render.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.phys.Vec3;
@@ -120,10 +119,9 @@ public class MiningHandler {
         pose.pushPose();
         var m4f = pose.last().pose();
         var consumer = buffer.getBuffer(RenderType.textBackground());
-        e.getGuiGraphics().drawString(mc.font, String.format("%.1f, %.1f", mc.player.getX(), mc.player.getZ()), 5, 5, Color.WHITE.getRGB(), true);
-        //e.getGuiGraphics().drawString(mc.font, String.format("x:%f  z:%f", solution.x, solution.y), 5, 5, Color.BLACK.getRGB(), false);
-        //e.getGuiGraphics().drawString(mc.font, String.format("x:%f  z:%f", mc.player.position().x, mc.player.position().z), 5, 15, Color.BLACK.getRGB(), false);
-
+        e.getGuiGraphics().drawString(mc.font,
+                String.format("%.2f, %.2f", mc.player.getX(),
+                        mc.player.getZ()), 5, 5, Color.WHITE.getRGB(), true);
         buffer.endBatch();
         pose.popPose();
     }

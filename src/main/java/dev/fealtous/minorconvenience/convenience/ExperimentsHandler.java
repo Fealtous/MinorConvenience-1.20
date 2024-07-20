@@ -1,15 +1,13 @@
 package dev.fealtous.minorconvenience.convenience;
 
 import com.mojang.logging.LogUtils;
-import dev.fealtous.minorconvenience.utils.RenderUtils;
-import dev.fealtous.minorconvenience.utils.TextUtils;
+import dev.fealtous.minorconvenience.utils.render.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.Slot;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
-import net.minecraftforge.client.event.sound.SoundEvent;
 import net.minecraftforge.event.ItemStackedOnOtherEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

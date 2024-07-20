@@ -2,7 +2,7 @@ package dev.fealtous.minorconvenience.dungeons;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.fealtous.minorconvenience.utils.InventoryHelper;
-import dev.fealtous.minorconvenience.utils.RenderUtils;
+import dev.fealtous.minorconvenience.utils.render.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -38,7 +38,7 @@ public class DungeonsHandler {
                     break;
                 }
             }
-
+            DungeonRoomIdentifier.identifyRoom();
         }
     }
 

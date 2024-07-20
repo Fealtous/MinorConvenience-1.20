@@ -2,13 +2,11 @@ package dev.fealtous.minorconvenience.dungeons;
 
 import com.mojang.math.Axis;
 import dev.fealtous.minorconvenience.utils.RegexUtils;
-import dev.fealtous.minorconvenience.utils.RenderUtils;
+import dev.fealtous.minorconvenience.utils.render.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.resources.PlayerSkin;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.MapItem;
@@ -25,42 +23,32 @@ import java.util.stream.Collectors;
 
 import static net.minecraftforge.client.gui.overlay.VanillaGuiOverlay.VIGNETTE;
 import static dev.fealtous.minorconvenience.utils.LocatorUtil.isDungeons;
-import static dev.fealtous.minorconvenience.utils.LocatorUtil.isDHub;
 
 public class DungeonMapRenderer {
     static Minecraft mc = Minecraft.getInstance();
     static Room size = Room.EMPTY;
-    private static final Set<String> players = new HashSet<>();
     static final int HOTBAR_LAST = 8;
-    static HashMap<Player, PlayerSkin> playerHeadsToRender = new HashMap<>();
-    private static void findPlayers() {
-        // Filter all player entities into real players.
-        var ps = mc.level.players().stream().filter((x) -> {
-            for (String player : players) {
-                var bool = player.contains(x.getName().getString());
-                System.out.println(player + " " + x.getName().getString() + " " + bool);
-                if (bool) {
-                    return true;
-                }
+
+    @SubscribeEvent
+    public static void dungeonChat(ClientChatReceivedEvent.System e) {
+        if (e.isOverlay()) return;
+        if (isDungeons()) {
+            var msg = e.getMessage().getString();
+            var match = RegexUtils.cataPlayerPattern.matcher(msg);
+            if (match.find()) {
+                size = Room.EMPTY;
+                DungeonRoomIdentifier.init();
+                return;
             }
-            return false;
-        }).collect(Collectors.toList());
-        players.clear();
-        playerHeadsToRender.clear();
-        for (AbstractClientPlayer p : ps) {
-            playerHeadsToRender.put(p, p.getSkin());
-            break;
+
         }
     }
-    private static boolean isGuiPhase(NamedGuiOverlay evt, VanillaGuiOverlay stage) {
-        return evt.id().equals(stage.id());
-    }
+
     @SubscribeEvent
     public static void mapRender(RenderGuiOverlayEvent.Post e) {
         if (!isDungeons()) return;
         var mapItemstack = ((Inventory) Minecraft.getInstance().player.inventoryMenu.slots.get(45).container).items.get(HOTBAR_LAST);
         var mapItem = mapItemstack.getItem();
-        RenderUtils.renderList(e.getGuiGraphics().pose(), e.getGuiGraphics(), players);
         if (mapItem instanceof MapItem) {
 
             var mc = Minecraft.getInstance();
@@ -88,20 +76,15 @@ public class DungeonMapRenderer {
                         mapdata,
                         true,
                         mc.getEntityRenderDispatcher().getPackedLightCoords(mc.player, e.getPartialTick()));
-
-                playerHeadsToRender.forEach((player, skin) -> {
-                    // Normalize world-space
-                    pose.pushPose();
-                    var x = (mc.player.getX() + size.x) / (size.x);
-                    var z = (mc.player.getZ() + size.z) / (size.z);
-                    // Then apply map-space conversion, offset to the center of the screen-map.
-                    pose.translate(64 + x* size.xm, 64 + z*size.zm, 0);
-                    //e.getGuiGraphics().drawString(mc.font, String.format("%.1f", x), 10,-10,0xffff);
-                    //e.getGuiGraphics().drawString(mc.font, String.format("%.1f", z), 10,10,0xffff);
-                    pose.mulPose(Axis.ZP.rotationDegrees(mc.player.getYRot() + 180));
-                    PlayerFaceRenderer.draw(e.getGuiGraphics(), skin, -4, -4, 8);
-                    pose.popPose();
-                });
+                // Normalize world-space
+                pose.pushPose();
+                var x = (mc.player.getX() + size.x) / (size.x);
+                var z = (mc.player.getZ() + size.z) / (size.z);
+                // Then apply map-space conversion, offset to the center of the screen-map.
+                pose.translate(64 + x* size.xm, 64 + z*size.zm, 0);
+                pose.mulPose(Axis.ZP.rotationDegrees(mc.player.getYRot() + 180));
+                PlayerFaceRenderer.draw(e.getGuiGraphics(), mc.player.getSkin(), -4, -4, 8);
+                pose.popPose();
                 pose.popPose();
             }
         }
@@ -110,7 +93,7 @@ public class DungeonMapRenderer {
     private static Supplier<TimerTask> findmap = () -> new TimerTask() {
         @Override
         public void run() {
-            var mapItemstack = ((Inventory) Minecraft.getInstance().player.inventoryMenu.slots.get(45).container).items.get(HOTBAR_LAST);
+            var mapItemstack = ((Inventory) mc.player.inventoryMenu.slots.get(45).container).items.get(HOTBAR_LAST);
             var mapItem = mapItemstack.getItem();
             if (mapItem instanceof MapItem) {
                 Integer mapId = MapItem.getMapId(mapItemstack);
@@ -122,7 +105,6 @@ public class DungeonMapRenderer {
                     if (MapColor.getColorFromPackedId(map[i]) == SAFE_ROOM) {
                         safeX = i % 128;
                         safeY = i / 128;
-                        System.out.println(safeX + " " + safeY);
                         break;
                     }
                 }
@@ -174,29 +156,14 @@ public class DungeonMapRenderer {
         }
     }
 
-    @SubscribeEvent
-    public static void dungeonChat(ClientChatReceivedEvent.System e) {
-        if (e.isOverlay()) return;
-        if (isDungeons()) {
-            var msg = e.getMessage().getString();
-            var match = RegexUtils.cataPlayerPattern.matcher(msg);
-            if (match.find()) {
-                players.add(match.group().split("\\s")[0]);
-                size = Room.EMPTY;
-                return;
-            }
-            if (RegexUtils.mortFoundADeadBody.matcher(msg).find()) {
-                findPlayers();
-                return;
-            }
-        }
-    }
-
     public static void alert() {
         if (!isDungeons()) return;
         if (size == Room.EMPTY) {
             setMapSize();
         }
+    }
+    private static boolean isGuiPhase(NamedGuiOverlay evt, VanillaGuiOverlay stage) {
+        return evt.id().equals(stage.id());
     }
 
     enum Room {

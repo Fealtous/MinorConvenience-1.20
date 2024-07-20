@@ -1,4 +1,4 @@
-package dev.fealtous.minorconvenience.utils;
+package dev.fealtous.minorconvenience.utils.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -43,6 +43,7 @@ public class RenderUtils {
         for (String string : strings) {
             gg.drawString(mc.font, string, 5, y, Color.WHITE.getRGB(), true);
             y+=15;
+
         }
         p.popPose();
     }
