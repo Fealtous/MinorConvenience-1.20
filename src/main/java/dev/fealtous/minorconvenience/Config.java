@@ -1,63 +1,84 @@
 package dev.fealtous.minorconvenience;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
+import com.mojang.logging.LogUtils;
+import dev.fealtous.minorconvenience.mining.MiningHandler;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-// An example config class. This is not required, but it's a good idea to have one to keep your config organized.
-// Demonstrates how to use Forge's config APIs
+
 @Mod.EventBusSubscriber(modid = MinorConvenience.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class Config
-{
+public class Config {
+
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
-
-    private static final ForgeConfigSpec.BooleanValue LOG_DIRT_BLOCK = BUILDER
-            .comment("Whether to log the dirt block on common setup")
-            .define("logDirtBlock", true);
-
-    private static final ForgeConfigSpec.IntValue MAGIC_NUMBER = BUILDER
-            .comment("A magic number")
-            .defineInRange("magicNumber", 42, 0, Integer.MAX_VALUE);
-
-    public static final ForgeConfigSpec.ConfigValue<String> MAGIC_NUMBER_INTRODUCTION = BUILDER
-            .comment("What you want the introduction message to be for the magic number")
-            .define("magicNumberIntroduction", "The magic number is... ");
-
-    // a list of strings that are treated as resource locations for items
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> ITEM_STRINGS = BUILDER
-            .comment("A list of items to log on common setup.")
-            .defineListAllowEmpty("items", List.of("minecraft:iron_ingot"), Config::validateItemName);
+    private static final ForgeConfigSpec.ConfigValue<Double> mapLeftOffset = BUILDER.push("Dungeon Map Settings")
+            .comment("Offset of map from left edge")
+            .defineInRange("left", .25, 0., 1.);
+    private static final ForgeConfigSpec.ConfigValue<Double> mapTopOffset = BUILDER
+            .comment("Offset of map from top edge")
+            .defineInRange("top", .25, 0., 1.);
+    private static final ForgeConfigSpec.ConfigValue<Double> mapScaleConf = BUILDER
+            .comment("Map Scaling")
+            .define("scale", 1.0);
+    private static final ForgeConfigSpec.ConfigValue<Boolean> enableMini = BUILDER
+            .comment("Enable the minimap")
+            .define("enabled", true);
+    private static final ForgeConfigSpec.ConfigValue<Double> divanToolSensitivity = BUILDER.pop().push("Mining")
+            .comment("Radius to use when attempting to locate divan tools. (larger = less precision)")
+            .define("sensitivity",3.);
+    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> powderChestLoot = BUILDER
+            .comment("Render order for powder chest loot. Also defines what will be tracked. " +
+                    "This is not sanitized, so keep it to alphanumeric characters. (numbers and letters only)")
+            .defineList("items", List.of("Gemstone Powder", "Blue Goblin Egg", "Red Goblin Egg",
+                    "Yellow Goblin Egg", "Green Goblin Egg", "Goblin Egg",
+                    "Sludge Juice", "Gold Essence", "Diamond Essence",
+                    "Robotron Reflector","FTX 3070","Control Switch",
+                    "Synthetic Heart","Superlite Motor","Electron Transmitter"), (x) -> true);
+    private static final ForgeConfigSpec.ConfigValue<Double> powderChestOverlayY = BUILDER
+            .comment("Offset of mining overlay from top edge")
+            .defineInRange("topMining", 0., 0., 1.);
+    private static final ForgeConfigSpec.ConfigValue<Double> powderChestOverlayX = BUILDER
+            .comment("Offset of mining overlay from left edge")
+            .defineInRange("leftMining", 0., 0., 1.);
+    private static final ForgeConfigSpec.ConfigValue<Double> petOverlayX = BUILDER
+            .comment("you get it by now")
+            .defineInRange("leftPet", 0., 0., 1.);
+    private static final ForgeConfigSpec.ConfigValue<Double> petOverlayY = BUILDER
+            .defineInRange("topPet", 0., 0., 1.);
 
     static final ForgeConfigSpec SPEC = BUILDER.build();
-
-    public static boolean logDirtBlock;
-    public static int magicNumber;
-    public static String magicNumberIntroduction;
-    public static Set<Item> items;
-
-    private static boolean validateItemName(final Object obj)
-    {
-        return obj instanceof final String itemName && ForgeRegistries.ITEMS.containsKey(new ResourceLocation(itemName));
-    }
+    public static double leftMapOffset;
+    public static double topMapOffset;
+    public static double mapScale;
+    public static double miningSens;
+    public static boolean enableDungeonMinimap;
+    public static double powderLeft;
+    public static double powderTop;
+    public static double petLeft;
+    public static double petTop;
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event)
     {
-        logDirtBlock = LOG_DIRT_BLOCK.get();
-        magicNumber = MAGIC_NUMBER.get();
-        magicNumberIntroduction = MAGIC_NUMBER_INTRODUCTION.get();
-
-        // convert the list of strings into a set of items
-        items = ITEM_STRINGS.get().stream()
-                .map(itemName -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName)))
-                .collect(Collectors.toSet());
+        mapScale = mapScaleConf.get();
+        leftMapOffset = mapLeftOffset.get() / 2.;
+        topMapOffset = mapTopOffset.get() / 2.;
+        miningSens = divanToolSensitivity.get();
+        enableDungeonMinimap = enableMini.get();
+        MiningHandler.updateRenderList((List<String>) powderChestLoot.get());
+        powderLeft = powderChestOverlayX.get();
+        powderTop = powderChestOverlayY.get();
+        petLeft = petOverlayX.get();
+        petTop = petOverlayY.get();
+    }
+    public static int getXOff(int flat, double modifier) {
+        return (int) (flat + (Minecraft.getInstance().getWindow().getGuiScaledWidth()* modifier));
+    }
+    public static int getYOff(int flat, double modifier) {
+        return (int) (flat + (Minecraft.getInstance().getWindow().getGuiScaledHeight() * modifier));
     }
 }

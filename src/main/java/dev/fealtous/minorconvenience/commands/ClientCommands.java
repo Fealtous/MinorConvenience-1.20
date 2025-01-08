@@ -1,16 +1,14 @@
 package dev.fealtous.minorconvenience.commands;
 
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.fealtous.minorconvenience.convenience.WaypointsHandler;
 import dev.fealtous.minorconvenience.dungeons.*;
+import dev.fealtous.minorconvenience.dungeons.secrets.DungeonSecretRenderer;
 import dev.fealtous.minorconvenience.utils.LocatorUtil;
-import dev.fealtous.minorconvenience.utils.network.CustomReader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
@@ -55,48 +53,48 @@ public class ClientCommands {
                 }));
         e.getDispatcher().register(Commands.literal("readPos")
                 .executes((ctx) -> {
-                    DungeonRoomIdentifier.identifyRoom();
+                    //DungeonSecretRenderer.identifyRoom();
                     return SINGLE_SUCCESS;
                 }));
 
-        e.getDispatcher().register(Commands.literal("secret")
-                .then(Commands.literal("start")
-                        .then(Commands.argument("roomName", StringArgumentType.string())
-                                .executes(ctx -> {
-                                    RoomDefiner.create(ctx.getArgument("roomName", String.class), DungeonRoomIdentifier.currentRoomHash);
-                                    return SINGLE_SUCCESS;
-                                })))
-                .then(Commands.literal("build")
-                        .executes(ctx -> {
-                            RoomDefiner.build();
-                            return SINGLE_SUCCESS;
-                        }))
-                .then(Commands.literal("solved")
-                        .then(Commands.argument("hash", IntegerArgumentType.integer())
-                                .executes(ctx -> {
-                                    RoomDefiner.solveVia(ctx.getArgument("hash", Integer.class));
-                                    return SINGLE_SUCCESS;
-                                })))
-                .then(Commands.literal("load")
-                        .executes(ctx -> {
-                            RoomDefiner.load();
-                            return SINGLE_SUCCESS;
-                        }))
-                .then(Commands.literal("save")
-                        .executes(ctx -> {
-                            RoomDefiner.save();
-                            return SINGLE_SUCCESS;
-                        }))
-        );
-        var secretCmd = Commands.literal("ss");
-        for (POIType value : POIType.values()) {
-            secretCmd = secretCmd.then(Commands.literal(value.name().toLowerCase())
-                    .executes(ctx -> {
-                        RoomDefiner.addPOI(value);
-                        return SINGLE_SUCCESS;
-                    }));
-        }
-        e.getDispatcher().register(secretCmd);
+//        e.getDispatcher().register(Commands.literal("secret")
+//                .then(Commands.literal("start")
+//                        .then(Commands.argument("roomName", StringArgumentType.string())
+//                                .executes(ctx -> {
+//                                    RoomDefinition.create(ctx.getArgument("roomName", String.class), DungeonRoomIdentifier.currentIdentifier);
+//                                    return SINGLE_SUCCESS;
+//                                })))
+//                .then(Commands.literal("build")
+//                        .executes(ctx -> {
+//                            RoomDefinition.build();
+//                            return SINGLE_SUCCESS;
+//                        }))
+//                .then(Commands.literal("solved")
+//                        .then(Commands.argument("hash", IntegerArgumentType.integer())
+//                                .executes(ctx -> {
+//                                    RoomDefinition.solveVia(ctx.getArgument("hash", Integer.class));
+//                                    return SINGLE_SUCCESS;
+//                                })))
+//                .then(Commands.literal("load")
+//                        .executes(ctx -> {
+//                            RoomDefinition.load();
+//                            return SINGLE_SUCCESS;
+//                        }))
+//                .then(Commands.literal("save")
+//                        .executes(ctx -> {
+//                            RoomDefinition.save();
+//                            return SINGLE_SUCCESS;
+//                        }))
+//        );
+//        var secretCmd = Commands.literal("ss");
+//        for (POIType value : POIType.values()) {
+//            secretCmd = secretCmd.then(Commands.literal(value.name().toLowerCase())
+//                    .executes(ctx -> {
+//                        RoomDefinition.addPOI(value);
+//                        return SINGLE_SUCCESS;
+//                    }));
+//        }
+//        e.getDispatcher().register(secretCmd);
     }
 
     private static Optional<UUID> optionalUUIDOf(String player) {

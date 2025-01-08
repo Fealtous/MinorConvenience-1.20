@@ -36,7 +36,7 @@ public class LocatorUtil {
     }
     public static Location whereAmI() {return current;}
     public static boolean isIn(Location loc) {
-        return current.equals(loc);
+        return current == loc || current.getParentZone() == loc;
     }
 
     private static boolean quickSearch(String str) {

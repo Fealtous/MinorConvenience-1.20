@@ -1,6 +1,8 @@
 package dev.fealtous.minorconvenience.dungeons;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.fealtous.minorconvenience.dungeons.secrets.DungeonSecretRenderer;
+import dev.fealtous.minorconvenience.dungeons.secrets.RoomScanner;
 import dev.fealtous.minorconvenience.utils.InventoryHelper;
 import dev.fealtous.minorconvenience.utils.render.RenderUtils;
 import net.minecraft.client.Minecraft;
@@ -38,7 +40,7 @@ public class DungeonsHandler {
                     break;
                 }
             }
-            DungeonRoomIdentifier.identifyRoom();
+            //RoomScanner.identifyRoom();
         }
     }
 

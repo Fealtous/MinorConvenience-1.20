@@ -1,4 +1,4 @@
-package dev.fealtous.minorconvenience.dungeons;
+package dev.fealtous.minorconvenience.dungeons.secrets;
 
 import net.minecraft.core.BlockPos;
 

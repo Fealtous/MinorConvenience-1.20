@@ -11,4 +11,5 @@ public class RegexUtils {
     public static final Pattern cataPlayerPattern = Pattern.compile("([a-zA-Z0-9_]+)\sis now ready!.*");
     public static final Pattern mortFoundADeadBody = Pattern.compile(".*Mort.*found.*map.*");
     public static final Pattern goodLuckLoser = Pattern.compile(".*Mort.*Good luck.*");
+    public static final Pattern autoPet = Pattern.compile("(\\[Lvl \\d{1,3}] [\\w\\s]+)!");
 }
