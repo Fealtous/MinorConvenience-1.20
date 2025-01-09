@@ -1,8 +1,6 @@
 package dev.fealtous.minorconvenience.convenience;
 
 import dev.fealtous.minorconvenience.Config;
-import dev.fealtous.minorconvenience.utils.Location;
-import dev.fealtous.minorconvenience.utils.LocatorUtil;
 import dev.fealtous.minorconvenience.utils.render.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
@@ -10,10 +8,11 @@ import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 
-import java.awt.Color;
+import java.awt.*;
 
 import static dev.fealtous.minorconvenience.Config.getXOff;
 import static dev.fealtous.minorconvenience.Config.getYOff;
+
 public class BasicInfoOverlay {
     static Minecraft mc = Minecraft.getInstance();
     public static String petInfo = "<Not Detected Yet>";

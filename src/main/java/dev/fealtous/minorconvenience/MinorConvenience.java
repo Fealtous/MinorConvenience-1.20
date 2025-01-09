@@ -10,7 +10,7 @@ import dev.fealtous.minorconvenience.dungeons.secrets.DungeonSecretRenderer;
 import dev.fealtous.minorconvenience.dungeons.DungeonsHandler;
 import dev.fealtous.minorconvenience.mining.DivanSolver;
 import dev.fealtous.minorconvenience.mining.MiningHandler;
-import dev.fealtous.minorconvenience.utils.network.PacketListener;
+import dev.fealtous.minorconvenience.utils.network.InboundListener;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -41,7 +41,7 @@ public class MinorConvenience
             MinecraftForge.EVENT_BUS.register(ExperimentsHandler.class);
             MinecraftForge.EVENT_BUS.register(ClientCommands.class);
             MinecraftForge.EVENT_BUS.register(WaypointsHandler.class);
-            MinecraftForge.EVENT_BUS.register(new PacketListener());
+            MinecraftForge.EVENT_BUS.register(new InboundListener());
             MinecraftForge.EVENT_BUS.register(MiningHandler.class);
             MinecraftForge.EVENT_BUS.register(DivanSolver.class);
             MinecraftForge.EVENT_BUS.register(ChatHandler.class);
@@ -58,9 +58,5 @@ public class MinorConvenience
             ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.SPEC);
         }
     }
-
-
-
-
 }
 

@@ -14,11 +14,11 @@ import java.util.Collection;
 import java.util.HashSet;
 
 @ChannelHandler.Sharable
-public class PacketListener extends SimpleChannelInboundHandler<Packet> {
+public class InboundListener extends SimpleChannelInboundHandler<Packet> {
     public static HashSet<String> exclusions = new HashSet<>();
     public static Collection<String> rcvd = null;
     public static Minecraft mc = Minecraft.getInstance();
-    public PacketListener() {
+    public InboundListener() {
         super(false);
     }
     @Override
@@ -41,5 +41,6 @@ public class PacketListener extends SimpleChannelInboundHandler<Packet> {
     @SubscribeEvent
     public void connect(ConnectionStartEvent e) {
         e.getConnection().channel().pipeline().addBefore("packet_handler", this.getClass().getName(), this);
+        e.getConnection().channel().pipeline().addBefore("packet_handler", OutboundListener.class.getName(), new OutboundListener());
     }
 }

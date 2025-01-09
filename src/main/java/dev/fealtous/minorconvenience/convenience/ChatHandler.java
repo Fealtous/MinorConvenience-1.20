@@ -1,23 +1,16 @@
 package dev.fealtous.minorconvenience.convenience;
 
-import com.mojang.logging.LogUtils;
 import dev.fealtous.minorconvenience.mining.DivanSolver;
 import dev.fealtous.minorconvenience.mining.MiningHandler;
 import dev.fealtous.minorconvenience.utils.Location;
 import dev.fealtous.minorconvenience.utils.LocatorUtil;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.*;
-import net.minecraft.network.chat.contents.PlainTextContents;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import static dev.fealtous.minorconvenience.utils.RegexUtils.autoPet;
-import static dev.fealtous.minorconvenience.utils.RegexUtils.metalDetectorPattern;
+import static dev.fealtous.minorconvenience.utils.RegexUtils.*;
 
 public class ChatHandler {
     private static boolean betweener = false;
@@ -37,7 +30,8 @@ public class ChatHandler {
             DivanSolver.refresh();
         } else { // Actually in chat
             String msg = e.getMessage().getString();
-            if (LocatorUtil.whereAmI().getParentZone() == Location.HOLLOWS_GENERIC) {
+            String clean = msg.replaceAll("§.", "");
+            if (LocatorUtil.isIn(Location.HOLLOWS_GENERIC)) {
                 e.setCanceled(betweener);
                 if (msg.contains("▬")) {
                     betweener = !betweener;
@@ -46,8 +40,12 @@ public class ChatHandler {
                 } else if (betweener) {
                     MiningHandler.push(e.getMessage());
                 }
+            } else if (LocatorUtil.isIn(Location.NETHER)) {
+                if (hellionFilter.matcher(clean).find() || daggerAttunementFilter.matcher(clean).find()) {
+                    e.setCanceled(true);
+                    return;
+                }
             }
-            String clean = msg.replaceAll("§.", "");
             Matcher autopet = autoPet.matcher(clean);
             if (autopet.find()) {
                 e.setCanceled(true);
