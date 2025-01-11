@@ -1,5 +1,6 @@
 package dev.fealtous.minorconvenience;
 
+import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.logging.LogUtils;
 import dev.fealtous.minorconvenience.commands.ClientCommands;
 import dev.fealtous.minorconvenience.convenience.*;
@@ -11,7 +12,9 @@ import dev.fealtous.minorconvenience.dungeons.DungeonsHandler;
 import dev.fealtous.minorconvenience.mining.DivanSolver;
 import dev.fealtous.minorconvenience.mining.MiningHandler;
 import dev.fealtous.minorconvenience.utils.network.InboundListener;
+import net.minecraft.client.renderer.FogRenderer;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -23,6 +26,8 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
+import java.util.Random;
+import java.util.function.Consumer;
 
 @Mod(MinorConvenience.MODID)
 public class MinorConvenience
@@ -49,6 +54,12 @@ public class MinorConvenience
             MinecraftForge.EVENT_BUS.register(DungeonSecretRenderer.class);
             MinecraftForge.EVENT_BUS.register(CFOptimizer.class);
             MinecraftForge.EVENT_BUS.register(Alerts.class);
+            MinecraftForge.EVENT_BUS.addListener((Consumer<ViewportEvent.RenderFog>) renderFog -> {
+                renderFog.setCanceled(true);
+                renderFog.setFogShape(FogShape.CYLINDER);
+                renderFog.setNearPlaneDistance(-4f);
+                renderFog.setFarPlaneDistance(100000f);
+            });
             IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
             modEventBus.addListener(KeyBindingHandlers::registerClientShit);
             modEventBus.addListener(BasicInfoOverlay::basicInfoOverlay);
