@@ -43,7 +43,7 @@ public class RenderUtils {
     }
 
     public static void definePoint(VertexConsumer consumer, Matrix4f matrix, Vec3 p) {
-        consumer.vertex(matrix, ((float) p.x), ((float) p.y), ((float) p.z)).color(0f,1f,0f,1f).normal(0,1,0).endVertex();
+        consumer.addVertex(matrix, ((float) p.x), ((float) p.y), ((float) p.z)).setColor(0f,1f,0f,1f).setNormal(0,1,0);
     }
 
     public static void renderList(PoseStack p, GuiGraphics gg, Collection<String> strings) {
@@ -61,41 +61,41 @@ public class RenderUtils {
     }
     public static void renderBox(BufferBuilder buffer, int x, int y, int z) {
         // Bottom
-        buffer.vertex(x, y, z).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
-        buffer.vertex(x+1, y, z).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
+        buffer.addVertex(x, y, z).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
+        buffer.addVertex(x+1, y, z).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
 
-        buffer.vertex(x, y, z+1).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
-        buffer.vertex(x+1, y, z+1).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
+        buffer.addVertex(x, y, z+1).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
+        buffer.addVertex(x+1, y, z+1).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
 
-        buffer.vertex(x+1, y, z).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
-        buffer.vertex(x+1, y, z+1).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
+        buffer.addVertex(x+1, y, z).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
+        buffer.addVertex(x+1, y, z+1).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
 
-        buffer.vertex(x, y, z+1).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
-        buffer.vertex(x, y, z).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
+        buffer.addVertex(x, y, z+1).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
+        buffer.addVertex(x, y, z).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
         // Top
-        buffer.vertex(x, y+1, z).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
-        buffer.vertex(x+1, y+1, z).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
+        buffer.addVertex(x, y+1, z).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
+        buffer.addVertex(x+1, y+1, z).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
 
-        buffer.vertex(x, y+1, z+1).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
-        buffer.vertex(x+1, y+1, z+1).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
+        buffer.addVertex(x, y+1, z+1).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
+        buffer.addVertex(x+1, y+1, z+1).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
 
-        buffer.vertex(x+1, y+1, z).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
-        buffer.vertex(x+1, y+1, z+1).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
+        buffer.addVertex(x+1, y+1, z).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
+        buffer.addVertex(x+1, y+1, z+1).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
 
-        buffer.vertex(x, y+1, z+1).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
-        buffer.vertex(x, y+1, z).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
+        buffer.addVertex(x, y+1, z+1).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
+        buffer.addVertex(x, y+1, z).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
         // Pillars
-        buffer.vertex(x, y+1, z).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
-        buffer.vertex(x, y, z).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
+        buffer.addVertex(x, y+1, z).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
+        buffer.addVertex(x, y, z).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
 
-        buffer.vertex(x+1, y+1, z+1).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
-        buffer.vertex(x+1, y, z+1).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
+        buffer.addVertex(x+1, y+1, z+1).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
+        buffer.addVertex(x+1, y, z+1).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
 
-        buffer.vertex(x+1, y+1, z).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
-        buffer.vertex(x+1, y, z).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
+        buffer.addVertex(x+1, y+1, z).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
+        buffer.addVertex(x+1, y, z).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
 
-        buffer.vertex(x, y+1, z+1).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
-        buffer.vertex(x, y, z+1).color(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff).endVertex();
+        buffer.addVertex(x, y+1, z+1).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
+        buffer.addVertex(x, y, z+1).setColor(RENDER_RED, RENDER_GREEN, RENDER_BLUE, 0xff);
     }
 
     public static void renderText(GuiGraphics gg, String text, int x, int y, Color color) {

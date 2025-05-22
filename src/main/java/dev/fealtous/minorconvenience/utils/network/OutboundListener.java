@@ -1,11 +1,13 @@
 package dev.fealtous.minorconvenience.utils.network;
 
+import dev.fealtous.minorconvenience.utils.Location;
+import dev.fealtous.minorconvenience.utils.LocatorUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
-import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class OutboundListener extends ChannelOutboundHandlerAdapter {
@@ -18,7 +20,7 @@ public class OutboundListener extends ChannelOutboundHandlerAdapter {
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         if (msg instanceof ServerboundUseItemOnPacket && mc.hitResult instanceof BlockHitResult) {
-            if (mc.player != null && mc.player.getMainHandItem().getItem() instanceof SwordItem) {
+            if (mc.player != null && mc.player.getMainHandItem().getComponents().has(DataComponents.WEAPON) && LocatorUtil.isIn(Location.NETHER)) {
                 return;
             }
         }

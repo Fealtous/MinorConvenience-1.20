@@ -1,16 +1,14 @@
 package dev.fealtous.minorconvenience.mining;
 
 import dev.fealtous.minorconvenience.Config;
+import dev.fealtous.minorconvenience.convenience.chat.ChatParser;
 import dev.fealtous.minorconvenience.utils.Location;
 import dev.fealtous.minorconvenience.utils.LocatorUtil;
-import dev.fealtous.minorconvenience.utils.render.RenderUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import static dev.fealtous.minorconvenience.utils.RegexUtils.keeperPattern;
+import static dev.fealtous.minorconvenience.utils.RegexUtils.metalDetectorPattern;
 
 public class DivanSolver {
     private static final String DIAMOND = "diamond";
@@ -30,7 +29,6 @@ public class DivanSolver {
     private static Vec3 center = Vec3.ZERO;
     private static Keeper npcOffset = Keeper.NONE;
     private static final ArrayList<Vec3> offsets = new ArrayList<>();
-
 
     public static void init() {
         initFlag = true;
@@ -83,30 +81,30 @@ public class DivanSolver {
             return (dist < Config.miningSens);
         }).collect(Collectors.toList());
     }
-
-    @SubscribeEvent
-    public static void renderPoint(RenderLevelStageEvent e) {
-        if (!LocatorUtil.isIn(Location.DIVAN) || !initFlag) return;
-        var item = mc.player.getMainHandItem().getDisplayName().getString();
-        if (!item.contains("Detector") || solutionSet.isEmpty()) return;
-        if (e.getStage().equals(RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS)) {
-            var pose = e.getPoseStack();
-            var camera = e.getCamera().getPosition();
-            var buffers = mc.renderBuffers();
-            var bufSource = buffers.bufferSource();
-
-            pose.pushPose();
-            pose.translate(-camera.x, -camera.y, -camera.z);
-            var matrix = pose.last().pose();
-            for (Vec3 sol : solutionSet) {
-                var consumer = bufSource.getBuffer(RenderType.lines());
-                RenderUtils.definePoint(consumer, matrix, mc.player.position().add(0, .25, 0));
-                RenderUtils.definePoint(consumer, matrix, center.add(sol).add(0,2,0));
-                bufSource.endBatch();
-            }
-            pose.popPose();
-        }
-    }
+// Need Framepass event
+//    @SubscribeEvent
+//    public static void renderPoint(RenderLevelStageEvent e) {
+//        if (!LocatorUtil.isIn(Location.DIVAN) || !initFlag) return;
+//        var item = mc.player.getMainHandItem().getDisplayName().getString();
+//        if (!item.contains("Detector") || solutionSet.isEmpty()) return;
+//        if (e.getStage().equals(RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS)) {
+//            var pose = e.getPoseStack();
+//            var camera = e.getCamera().getPosition();
+//            var buffers = mc.renderBuffers();
+//            var bufSource = buffers.bufferSource();
+//
+//            pose.pushPose();
+//            pose.translate(-camera.x, -camera.y, -camera.z);
+//            var matrix = pose.last().pose();
+//            for (Vec3 sol : solutionSet) {
+//                var consumer = bufSource.getBuffer(RenderType.lines());
+//                RenderUtils.definePoint(consumer, matrix, mc.player.position().add(0, .25, 0));
+//                RenderUtils.definePoint(consumer, matrix, center.add(sol).add(0,2,0));
+//                bufSource.endBatch();
+//            }
+//            pose.popPose();
+//        }
+//    }
     public static void alert() {
         if (LocatorUtil.isIn(Location.DIVAN)) {
             if (!initFlag) init();
@@ -115,6 +113,20 @@ public class DivanSolver {
             if (initFlag) deInit();
         }
     }
+    public static final ChatParser parser = new ChatParser() {
+
+        @Override
+        public boolean handleMessage(Component msg) {
+            Matcher matcher = metalDetectorPattern.matcher(msg.getString());
+            if (matcher.find()) {
+                String match = matcher.group(0);
+                match = match.substring(0, match.length()-1);
+                push(Float.parseFloat(match));
+            }
+            if (msg.getString().matches(".*You found.*Metal.*")) refresh();
+            return false;
+        }
+    };
     static {
         // Locations are relative to the center of the divan mines, y value relative to the Keeperss.
         offsets.addAll(Arrays.asList(

@@ -1,9 +1,11 @@
 package dev.fealtous.minorconvenience.utils;
 
+import dev.fealtous.minorconvenience.MinorConvenience;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
 
 import java.util.LinkedList;
@@ -20,7 +22,13 @@ public class TextUtils {
         return list;
     }
     public static void sendIngameMessage(String text) {
-        Minecraft.getInstance().player.sendSystemMessage(Component.literal(text));
+        Minecraft.getInstance().gui.getChat().addMessage(Component.literal(text));
+    }
+    public static String clean(Component msg) {
+        return msg.getString().replaceAll("§.", "");
     }
 
+    public static ResourceLocation rl(String name) {
+        return ResourceLocation.fromNamespaceAndPath(MinorConvenience.MODID, name);
+    }
 }

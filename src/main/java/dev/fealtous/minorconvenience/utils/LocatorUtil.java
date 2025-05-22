@@ -15,14 +15,13 @@ public class LocatorUtil {
     public static void alert() {
         Scoreboard sideBar = Minecraft.getInstance().level.getScoreboard();
         for (PlayerTeam playerTeam : sideBar.getPlayerTeams()) {
-            String str = (playerTeam.getPlayerPrefix().getString() + playerTeam.getPlayerSuffix().getString()).trim();
-            if (str.contains("⏣")) {
-                str = str.replaceAll("[^a-zA-Z\\s]", "").trim().toLowerCase();
+            String str = (TextUtils.clean(playerTeam.getPlayerPrefix()) + TextUtils.clean(playerTeam.getPlayerSuffix())).trim();
+            if (str.startsWith("⏣")) {
+                str = str.substring(1).trim();
                 if (quickSearch(str)) {
                     break;
                 }
                 for (Location location : easyRef) {
-                    //LogUtils.getLogger().debug(location.getName());
                     if (location.compare(str)) {
                         current = location;
                         return; // Function is finished, gtfo
@@ -31,6 +30,15 @@ public class LocatorUtil {
                 current = UNKNOWN;
                 LogUtils.getLogger().debug(str);
                 break; // Didn't find, set to unknown, log so you can drop in later.
+            } else if (str.startsWith("ф")) {
+                current = RIFT;
+                str = str.substring(1).trim();
+                for (int i = RIFT.ordinal(); i < easyRef.length; i++) {
+                    if (easyRef[i].compare(str)) {
+                        current = easyRef[i];
+                        return;
+                    }
+                }
             }
         }
     }
@@ -51,7 +59,7 @@ public class LocatorUtil {
                     return true;
                 }
                 iterator++;
-            } while (!easyRef[iterator].getParentZone().equals(NONE));
+            } while (!easyRef[iterator].getParentZone().equals(GLOBAL));
         } catch (Exception e) {
             LogUtils.getLogger().error(String.format("Failed to process: %s", str));
             LogUtils.getLogger().error(String.format("Iterator was at: %d", iterator));
@@ -61,8 +69,5 @@ public class LocatorUtil {
 
     public static boolean isDungeons() {
         return LocatorUtil.isIn(CATACOMBS);
-    }
-    public static boolean isDHub() {
-        return LocatorUtil.isIn(DUNGEON_HUB);
     }
 }

@@ -3,16 +3,15 @@ package dev.fealtous.minorconvenience.mining;
 
 import com.mojang.logging.LogUtils;
 import dev.fealtous.minorconvenience.Config;
+import dev.fealtous.minorconvenience.convenience.chat.ChatHandler;
+import dev.fealtous.minorconvenience.convenience.chat.ChatParser;
 import dev.fealtous.minorconvenience.utils.Location;
 import dev.fealtous.minorconvenience.utils.LocatorUtil;
 import dev.fealtous.minorconvenience.utils.render.RenderUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,11 +37,32 @@ public class MiningHandler {
     }
     private static List<Component> components = null;
     private static int chestCount = 0;
+    public static final ChatParser parser = new ChatParser() {
+        boolean chestContents = false;
+
+        @Override
+        public boolean handleMessage(Component msg) {
+            String clean = msg.getString().replaceAll("§.", "");
+            if (clean.contains("▬")) {
+                chestContents = !chestContents;
+                MiningHandler.push(null);
+            } else if (chestContents) {
+                push(msg);
+            }
+            return chestContents;
+        }
+    };
+
     public static void push(Component comp) {
         if (comp == null) {
             if (components == null) {
                 components = new ArrayList<>();
             } else {
+                if (!components.get(0).getString().matches(".*CHEST.*")) {
+                    ChatHandler.unCancel(components);
+                    components = null;
+                    return;
+                }
                 for (Component component : components) {
                     var msg = component.getString();
                     Matcher finder = SHOULD_TRACK.matcher(msg);
@@ -65,24 +85,19 @@ public class MiningHandler {
             components.add(comp);
         }
     }
-    public static void registerChestLootOverlay(RegisterGuiOverlaysEvent e) {
-        IGuiOverlay overlay = (gui, guiGraphics, partialTick, screenWidth, screenHeight) -> {
-            if (LocatorUtil.whereAmI().getParentZone() != Location.HOLLOWS_GENERIC) return;
-            int yoffset = getYOff(5, Config.powderTop);
-            int xoffset = getXOff(5, Config.powderLeft);
-            RenderUtils.renderText(guiGraphics, "Chests: " + chestCount, xoffset, yoffset);
-            for (String s : RENDER_ORDER) {
-                var val = renderables.get(s);
-                if (val != null) {
-                    yoffset += 10;
-                    RenderUtils.renderText(guiGraphics, s + ": " + val, xoffset, yoffset);
-                }
+
+    public static final LayeredDraw.Layer miningOverlay = (gui, delta) -> {
+        if (LocatorUtil.whereAmI().getParentZone() != Location.HOLLOWS_GENERIC) return;
+        int yoffset = getYOff(5, Config.powderTop);
+        int xoffset = getXOff(5, Config.powderLeft);
+        RenderUtils.renderText(gui, "Chests: " + chestCount, xoffset, yoffset);
+        for (String s : RENDER_ORDER) {
+            var val = renderables.get(s);
+            if (val != null) {
+                yoffset += 10;
+                RenderUtils.renderText(gui, s + ": " + val, xoffset, yoffset);
             }
-
-        };
-        e.registerAbove(VanillaGuiOverlay.VIGNETTE.id(), "mcvc_powder_mining", overlay);
-    }
-
-
+        }
+    };
 }
 

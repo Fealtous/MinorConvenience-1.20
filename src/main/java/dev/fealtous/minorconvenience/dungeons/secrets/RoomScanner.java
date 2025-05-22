@@ -1,16 +1,9 @@
 package dev.fealtous.minorconvenience.dungeons.secrets;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import dev.fealtous.minorconvenience.utils.render.RenderUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec2;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL11;
 import oshi.util.tuples.Pair;
 
 import java.util.ArrayList;
@@ -162,66 +155,67 @@ public class RoomScanner {
         EAST,
         WEST
     }
-    public static void debugRenderer(RenderLevelStageEvent e) {
-        if (e.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER) {
-            var pose = e.getPoseStack();
-            var matrix = e.getProjectionMatrix();
-            // Room scanning indication
-            VertexBuffer vBuff = new VertexBuffer(VertexBuffer.Usage.STATIC);
-            Tesselator tesselator = Tesselator.getInstance();
-            BufferBuilder buffer = tesselator.getBuilder();
-            buffer.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
-            for (int xit = xStart + centering; xit < xStart + ROOM_SIZE - centering; xit++) {
-                for (int zit = zStart + centering; zit < zStart + ROOM_SIZE - centering; zit++) {
-                    RenderUtils.renderBox(buffer, xit, HEIGHT, zit);
-                }
-            }
-
-            int baseZ = zStart + (ROOM_SIZE / 2) - centering + 2;
-            int baseX = xStart + (ROOM_SIZE / 2) - centering + 2;
-            int scanLength = 8;
-            int offset = 4;
-            // west
-            RenderUtils.setRenderColor(0xff00ff);
-            for (int zit = baseZ; zit < baseZ + 6; zit++) {
-                for (int xit = baseX; xit > baseX - scanLength - offset; xit--) {
-                    RenderUtils.renderBox(buffer, xit, HEIGHT, zit);
-                }
-            }
-            RenderUtils.setRenderColor(0x00ffff);
-            // north
-            for (int xit = baseX; xit < baseX + 6; xit++) {
-                for (int zit = baseZ; zit > baseZ - scanLength - offset; zit--) {
-                    RenderUtils.renderBox(buffer, xit, HEIGHT, zit);
-                }
-            }
-            RenderUtils.setRenderColor(0x00ff00);
-            // east
-            for (int zit = baseZ + 5; zit >= baseZ; zit--) {
-                for (int xit = baseX + centering; xit < baseX + centering + scanLength + offset; xit++) {
-                    RenderUtils.renderBox(buffer, xit, HEIGHT, zit);
-                }
-            }
-            RenderUtils.resetRenderColor();
-
-            vBuff.bind();
-            vBuff.upload(buffer.end());
-            VertexBuffer.unbind();
-
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            GL11.glEnable(GL11.GL_LINE_SMOOTH);
-            GL11.glDisable(GL11.GL_DEPTH_TEST);
-            RenderSystem.setShader(GameRenderer::getPositionColorShader);
-            pose.pushPose();
-            RenderUtils.renderRelativeToPlayer(pose, mc.cameraEntity);
-            vBuff.bind();
-            vBuff.drawWithShader(pose.last().pose(), new Matrix4f(matrix), RenderSystem.getShader());
-            VertexBuffer.unbind();
-            pose.popPose();
-            GL11.glEnable(GL11.GL_DEPTH_TEST);
-            GL11.glDisable(GL11.GL_BLEND);
-            GL11.glDisable(GL11.GL_LINE_SMOOTH);
-        }
-    }
+    //skull emoji
+//    public static void debugRenderer(RenderLevelStageEvent e) {
+//        if (e.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER) {
+//            var pose = e.getPoseStack();
+//            var matrix = e.getProjectionMatrix();
+//            // Room scanning indication
+//            VertexBuffer vBuff = new VertexBuffer(VertexBuffer.Usage.STATIC);
+//            Tesselator tesselator = Tesselator.getInstance();
+//            BufferBuilder buffer = tesselator.getBuilder();
+//            buffer.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
+//            for (int xit = xStart + centering; xit < xStart + ROOM_SIZE - centering; xit++) {
+//                for (int zit = zStart + centering; zit < zStart + ROOM_SIZE - centering; zit++) {
+//                    RenderUtils.renderBox(buffer, xit, HEIGHT, zit);
+//                }
+//            }
+//
+//            int baseZ = zStart + (ROOM_SIZE / 2) - centering + 2;
+//            int baseX = xStart + (ROOM_SIZE / 2) - centering + 2;
+//            int scanLength = 8;
+//            int offset = 4;
+//            // west
+//            RenderUtils.setRenderColor(0xff00ff);
+//            for (int zit = baseZ; zit < baseZ + 6; zit++) {
+//                for (int xit = baseX; xit > baseX - scanLength - offset; xit--) {
+//                    RenderUtils.renderBox(buffer, xit, HEIGHT, zit);
+//                }
+//            }
+//            RenderUtils.setRenderColor(0x00ffff);
+//            // north
+//            for (int xit = baseX; xit < baseX + 6; xit++) {
+//                for (int zit = baseZ; zit > baseZ - scanLength - offset; zit--) {
+//                    RenderUtils.renderBox(buffer, xit, HEIGHT, zit);
+//                }
+//            }
+//            RenderUtils.setRenderColor(0x00ff00);
+//            // east
+//            for (int zit = baseZ + 5; zit >= baseZ; zit--) {
+//                for (int xit = baseX + centering; xit < baseX + centering + scanLength + offset; xit++) {
+//                    RenderUtils.renderBox(buffer, xit, HEIGHT, zit);
+//                }
+//            }
+//            RenderUtils.resetRenderColor();
+//
+//            vBuff.bind();
+//            vBuff.upload(buffer.end());
+//            VertexBuffer.unbind();
+//
+//            GL11.glEnable(GL11.GL_BLEND);
+//            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+//            GL11.glEnable(GL11.GL_LINE_SMOOTH);
+//            GL11.glDisable(GL11.GL_DEPTH_TEST);
+//            RenderSystem.setShader(GameRenderer::getPositionColorShader);
+//            pose.pushPose();
+//            RenderUtils.renderRelativeToPlayer(pose, mc.cameraEntity);
+//            vBuff.bind();
+//            vBuff.drawWithShader(pose.last().pose(), new Matrix4f(matrix), RenderSystem.getShader());
+//            VertexBuffer.unbind();
+//            pose.popPose();
+//            GL11.glEnable(GL11.GL_DEPTH_TEST);
+//            GL11.glDisable(GL11.GL_BLEND);
+//            GL11.glDisable(GL11.GL_LINE_SMOOTH);
+//        }
+//    }
 }

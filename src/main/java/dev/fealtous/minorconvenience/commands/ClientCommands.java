@@ -20,11 +20,12 @@ import java.util.UUID;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class ClientCommands {
+    private static Minecraft mc = Minecraft.getInstance();
     @SubscribeEvent
     public static void register(RegisterClientCommandsEvent e) {
         e.getDispatcher().register(Commands.literal("resetblaze").executes((x)-> {
             DungeonsHandler.resetBlazes();
-            Minecraft.getInstance().player.sendSystemMessage(Component.literal("Successfully reset blazes."));
+            mc.gui.getChat().addMessage(Component.literal("Successfully reset blazes."));
 
             return SINGLE_SUCCESS;
         }));
@@ -33,7 +34,7 @@ public class ClientCommands {
                 .then(Commands.argument("playername", StringArgumentType.string())
                         .executes(ctx -> {
                             var pname = ctx.getArgument("playername", String.class);
-                            Minecraft.getInstance().player.sendSystemMessage(Component.literal("Looking up " + pname));
+                            mc.gui.getChat().addMessage(Component.literal("Looking up " + pname));
                             return SINGLE_SUCCESS;
                 })));
 
@@ -43,7 +44,7 @@ public class ClientCommands {
                     return SINGLE_SUCCESS;
                 }))
                 .then(Commands.literal("delete").executes((ctx) -> {
-                    Minecraft.getInstance().player.sendSystemMessage(Component.literal("deleted waypoint"));
+                    mc.gui.getChat().addMessage(Component.literal("deleted waypoint"));
                     return SINGLE_SUCCESS;
                 })));
         e.getDispatcher().register(Commands.literal("coords")
