@@ -13,8 +13,10 @@ import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 @ChannelHandler.Sharable
 public class InboundListener extends SimpleChannelInboundHandler<Packet> {
     public static Minecraft mc = Minecraft.getInstance();
+    private static InboundListener instance = null;
     public InboundListener() {
         super(false);
+        instance = this;
     }
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Packet msg) throws Exception {
@@ -34,8 +36,9 @@ public class InboundListener extends SimpleChannelInboundHandler<Packet> {
     }
 
     @SubscribeEvent
-    public void connect(ConnectionStartEvent e) {
-        e.getConnection().channel().pipeline().addBefore("packet_handler", this.getClass().getName(), this);
+    public static void onConnect(ConnectionStartEvent e) {
+        new InboundListener();
+        e.getConnection().channel().pipeline().addBefore("packet_handler", InboundListener.class.getName(), instance);
         e.getConnection().channel().pipeline().addBefore("packet_handler", OutboundListener.class.getName(), new OutboundListener());
     }
 }

@@ -10,12 +10,14 @@ import dev.fealtous.minorconvenience.dungeons.DungeonsHandler;
 import dev.fealtous.minorconvenience.mining.MiningHandler;
 import dev.fealtous.minorconvenience.utils.Location;
 import dev.fealtous.minorconvenience.utils.LocatorUtil;
+import dev.fealtous.minorconvenience.utils.network.InboundListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.AddGuiOverlayLayersEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.client.gui.overlay.ForgeLayeredDraw;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.network.ConnectionStartEvent;
 import net.minecraftforge.eventbus.api.bus.BusGroup;
 
 public class ListenerInit {
@@ -25,8 +27,7 @@ public class ListenerInit {
         ExperimentsHandler.init();
         ClientCommands.init();
         //MinecraftForge.EVENT_BUS.register(WaypointsHandler.class); // todo framepass or FLD
-        //MinecraftForge.EVENT_BUS.register(new InboundListener()); // todo determine wtf i'll do with this
-        MinecraftForge.EVENT_BUS.register(MiningHandler.class); // todo FLD rework
+        ConnectionStartEvent.BUS.addListener(InboundListener::onConnect); // todo determine wtf i'll do with this
         //MinecraftForge.EVENT_BUS.register(DivanSolver.class); // todo FLD rework & Framepass
         ChatHandler.init();
         DungeonMapRenderer.init();
