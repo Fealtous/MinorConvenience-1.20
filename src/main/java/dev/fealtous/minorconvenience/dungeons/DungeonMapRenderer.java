@@ -53,14 +53,13 @@ public class DungeonMapRenderer {
         var mapdata = MapItem.getSavedData(mapItemstack, mc.level);
         if (mapdata == null) return;
         float scale = (float) Config.mapScale;
-
-//            pose.pushMatrix();
-//
-//            pose.translate(getXOff(5, Config.leftMapOffset), getYOff(5, Config.topMapOffset));
-//            pose.scale(scale,scale);
+        pose.pushMatrix();
+        pose.translate(getXOff(5, Config.leftMapOffset), getYOff(5, Config.topMapOffset));
+        pose.scale(scale,scale);
         var state = new MapRenderState();
         mc.getMapRenderer().extractRenderState(mapid, mapdata, state);
         state.decorations.forEach((decoration) -> decoration.renderOnFrame = true);
         guiGraphics.submitMapRenderState(state);
+        pose.popMatrix();
     };
 }
