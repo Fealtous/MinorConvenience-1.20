@@ -24,11 +24,10 @@ public class DungeonMapRenderer {
     private static final Minecraft mc = Minecraft.getInstance();
     static final int HOTBAR_LAST = 8;
 
-    private static final ResourceLocation mapRl = ResourceLocation.fromNamespaceAndPath(MinorConvenience.MODID, "dungeon_map");
+    public static final ResourceLocation mapRl = ResourceLocation.fromNamespaceAndPath(MinorConvenience.MODID, "dungeon_map");
 
-    public static void init(BusGroup busGroup) {
+    public static void init() {
         SystemMessageReceivedEvent.BUS.addListener(DungeonMapRenderer::dungeonChat);
-        AddGuiOverlayLayersEvent.getBus(busGroup).addListener(DungeonMapRenderer::overlay);
     }
 
     public static void dungeonChat(SystemMessageReceivedEvent e) {
@@ -39,10 +38,6 @@ public class DungeonMapRenderer {
                 RoomScanner.init();
             }
         }
-    }
-
-    public static void overlay(AddGuiOverlayLayersEvent evt) {
-        evt.getLayeredDraw().addAbove(mapRl, ForgeLayeredDraw.SLEEP_OVERLAY, mapOverlay);
     }
 
     public static final ForgeLayer mapOverlay = (guiGraphics, partialTick) -> {

@@ -38,25 +38,7 @@ public class MinorConvenience
     public MinorConvenience(FMLJavaModLoadingContext fmlctx)
     {
         if (FMLEnvironment.dist.equals(Dist.CLIENT)) {
-            DungeonsHandler.init(); // todo requires full rewrite
-            ExperimentsHandler.init();
-            ClientCommands.init();
-            //MinecraftForge.EVENT_BUS.register(WaypointsHandler.class); // todo framepass or FLD
-            //MinecraftForge.EVENT_BUS.register(new InboundListener()); // todo determine wtf i'll do with this
-            //MinecraftForge.EVENT_BUS.register(MiningHandler.class); // todo FLD rework
-            //MinecraftForge.EVENT_BUS.register(DivanSolver.class); // todo FLD rework & Framepass
-            ChatHandler.init();
-            DungeonMapRenderer.init(fmlctx.getModBusGroup());
-            //MinecraftForge.EVENT_BUS.register(DungeonSecretRenderer.class); // todo framepass
-            //MinecraftForge.EVENT_BUS.register(CFOptimizer.class);
-            Alerts.init();
-            ViewportEvent.RenderFog.BUS.addListener(evt -> {
-
-                evt.setNearPlaneDistance(-4f);
-                evt.setFarPlaneDistance(100000f);
-            });
-            var modEventBus = fmlctx.getModBusGroup();
-            RegisterKeyMappingsEvent.getBus(modEventBus).addListener(KeyBindingHandlers::registerClientShit);
+            ListenerInit.init(fmlctx.getModBusGroup());
             fmlctx.registerConfig(ModConfig.Type.CLIENT, Config.SPEC);
         }
     }

@@ -5,11 +5,12 @@ import com.mojang.logging.LogUtils;
 import dev.fealtous.minorconvenience.Config;
 import dev.fealtous.minorconvenience.convenience.chat.ChatHandler;
 import dev.fealtous.minorconvenience.convenience.chat.ChatParser;
-import dev.fealtous.minorconvenience.utils.Location;
-import dev.fealtous.minorconvenience.utils.LocatorUtil;
+import dev.fealtous.minorconvenience.utils.ResourceHelper;
 import dev.fealtous.minorconvenience.utils.render.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.gui.overlay.ForgeLayer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,18 +86,18 @@ public class MiningHandler {
         }
     }
 
-//    public static final LayeredDraw.Layer miningOverlay = (gui, delta) -> {
-//        if (LocatorUtil.whereAmI().getParentZone() != Location.HOLLOWS_GENERIC) return;
-//        int yoffset = getYOff(5, Config.powderTop);
-//        int xoffset = getXOff(5, Config.powderLeft);
-//        RenderUtils.renderText(gui, "Chests: " + chestCount, xoffset, yoffset);
-//        for (String s : RENDER_ORDER) {
-//            var val = renderables.get(s);
-//            if (val != null) {
-//                yoffset += 10;
-//                RenderUtils.renderText(gui, s + ": " + val, xoffset, yoffset);
-//            }
-//        }
-//    };
+    public static final ResourceLocation miningRl = ResourceHelper.rl("minor_mining");
+    public static final ForgeLayer miningOverlay = (gui, delta) -> {
+        int yoffset = getYOff(5, Config.powderTop);
+        int xoffset = getXOff(5, Config.powderLeft);
+        RenderUtils.renderText(gui, "Chests: " + chestCount, xoffset, yoffset);
+        for (String s : RENDER_ORDER) {
+            var val = renderables.get(s);
+            if (val != null) {
+                yoffset += 10;
+                RenderUtils.renderText(gui, s + ": " + val, xoffset, yoffset);
+            }
+        }
+    };
 }
 
