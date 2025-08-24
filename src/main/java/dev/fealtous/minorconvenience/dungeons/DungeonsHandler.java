@@ -1,12 +1,23 @@
 package dev.fealtous.minorconvenience.dungeons;
 
+import com.mojang.blaze3d.framegraph.FramePass;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.fealtous.minorconvenience.utils.InventoryHelper;
+import dev.fealtous.minorconvenience.utils.ResourceHelper;
 import dev.fealtous.minorconvenience.utils.render.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.client.renderer.LevelTargetBundle;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Blaze;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.client.FramePassManager;
+import net.minecraftforge.client.event.AddFramePassEvent;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -27,7 +38,9 @@ public class DungeonsHandler {
         LivingDeathEvent.BUS.addListener(DungeonsHandler::onBlazeDeath);
         ScreenEvent.Render.Post.BUS.addListener(DungeonsHandler::terminalSolver);
         ClientChatReceivedEvent.BUS.addListener(DungeonsHandler::threeWeirdos);
-
+        AddFramePassEvent.BUS.addListener((evt) -> {
+           evt.addPass(ResourceHelper.rl("blaze_renderer"), blazeRenderer);
+        });
     }
 
     public static void alert() {
@@ -43,34 +56,38 @@ public class DungeonsHandler {
             //RoomScanner.identifyRoom();
         }
     }
-// Needs frame pass event
-//    @SubscribeEvent
-//    public static void renderBlazeBounding(RenderLevelStageEvent e) {
-//        if (!blazes.isEmpty() && isDungeons()) {
-//            if (e.getStage().equals(RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS)) {
-//                var ps = e.getPoseStack();
-//                Player p = mc.player;
-//                ps.pushPose();
-//                RenderUtils.renderRelativeToPlayer(ps, p);
-//                MultiBufferSource.BufferSource rb = mc.renderBuffers().bufferSource();
-//                VertexConsumer vc = rb.getBuffer(RenderType.LINES);
-//                try {
-//                    if (blazes.size() <= 0) return;
-//                    if (blazes.size() != 1) {
-//                        LevelRenderer.renderLineBox(ps, vc, blazes.getFirst().getBoundingBox(), 1, 0, 0, 1);
-//                        LevelRenderer.renderLineBox(ps, vc, blazes.getLast().getBoundingBox(), 0, 1, 0, 1);
-//                    } else {
-//                        LevelRenderer.renderLineBox(ps, vc, blazes.get(0).getBoundingBox(), 1, 1, 1, 1);
-//                    }
-//                } catch (Exception e1) {
-//                    blazes.clear();
-//                }
-//                ps.popPose();
-//                rb.endBatch(RenderType.LINES);
-//
-//            }
-//        }
-//    }
+
+    public static final FramePassManager.PassDefinition blazeRenderer = new FramePassManager.PassDefinition() {
+        @Override
+        public void targets(LevelTargetBundle bundle, FramePass pass) {
+            bundle.main = pass.readsAndWrites(bundle.main);
+        }
+
+        @Override
+        public void executes() {
+            if (!blazes.isEmpty() && isDungeons()) {
+                PoseStack ps = new PoseStack();
+                var p = mc.gameRenderer.getMainCamera();
+                ps.pushPose();
+                RenderUtils.renderRelativeToPlayer(ps, p);
+                MultiBufferSource.BufferSource rb = mc.renderBuffers().bufferSource();
+                VertexConsumer vc = rb.getBuffer(RenderType.LINES);
+                try {
+                    if (blazes.size() <= 0) return;
+                    if (blazes.size() != 1) {
+                        ShapeRenderer.renderLineBox(ps, vc, blazes.getFirst().getBoundingBox(), 1, 0, 0, 1);
+                        ShapeRenderer.renderLineBox(ps, vc, blazes.getLast().getBoundingBox(), 0, 1, 0, 1);
+                    } else {
+                        ShapeRenderer.renderLineBox(ps, vc, blazes.get(0).getBoundingBox(), 1, 1, 1, 1);
+                    }
+                } catch (Exception e1) {
+                    blazes.clear();
+                }
+                ps.popPose();
+                rb.endBatch(RenderType.LINES);
+            }
+        }
+    };
 
     @SubscribeEvent
     public static void onBlazeDeath(LivingDeathEvent e) {

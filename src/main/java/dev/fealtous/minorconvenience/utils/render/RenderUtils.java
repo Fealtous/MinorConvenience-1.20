@@ -1,6 +1,7 @@
 package dev.fealtous.minorconvenience.utils.render;
 
 import com.mojang.blaze3d.vertex.*;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
@@ -26,8 +27,8 @@ public class RenderUtils {
     public static void resetRenderColor() {
         RENDER_RED = 0xff; RENDER_GREEN = 0xff; RENDER_BLUE = 0xff;
     }
-    public static void renderRelativeToPlayer(PoseStack ps, Entity p) {
-        ps.translate(-p.getX(), -p.getY()-mc.player.getEyeHeight(), -p.getZ());
+    public static void renderRelativeToPlayer(PoseStack ps, Camera p) {
+        ps.translate(p.getPosition().multiply(-1,-1,-1));
     }
 
     public static final int HIGHLIGHT = 0x99007733;
