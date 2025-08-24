@@ -7,12 +7,15 @@ import dev.fealtous.minorconvenience.convenience.chat.ChatHandler;
 import dev.fealtous.minorconvenience.convenience.experiments.ExperimentsHandler;
 import dev.fealtous.minorconvenience.dungeons.DungeonMapRenderer;
 import dev.fealtous.minorconvenience.dungeons.DungeonsHandler;
+import dev.fealtous.minorconvenience.mining.DivanSolver;
 import dev.fealtous.minorconvenience.mining.MiningHandler;
 import dev.fealtous.minorconvenience.utils.Location;
 import dev.fealtous.minorconvenience.utils.LocatorUtil;
+import dev.fealtous.minorconvenience.utils.ResourceHelper;
 import dev.fealtous.minorconvenience.utils.network.InboundListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.event.AddFramePassEvent;
 import net.minecraftforge.client.event.AddGuiOverlayLayersEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.ViewportEvent;
@@ -29,7 +32,9 @@ public class ListenerInit {
         ClientCommands.init();
         //MinecraftForge.EVENT_BUS.register(WaypointsHandler.class); // todo framepass or FLD
         ConnectionStartEvent.BUS.addListener(InboundListener::onConnect); // todo determine wtf i'll do with this
-        //MinecraftForge.EVENT_BUS.register(DivanSolver.class); // todo FLD rework & Framepass
+        AddFramePassEvent.BUS.addListener((evt) -> {
+            evt.addPass(ResourceHelper.rl("divan_solver"), DivanSolver.divanSolver);
+        });
         ChatHandler.init();
         DungeonMapRenderer.init();
         //MinecraftForge.EVENT_BUS.register(DungeonSecretRenderer.class); // todo framepass

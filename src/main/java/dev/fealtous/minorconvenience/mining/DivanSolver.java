@@ -1,14 +1,20 @@
 package dev.fealtous.minorconvenience.mining;
 
+import com.mojang.blaze3d.framegraph.FramePass;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.fealtous.minorconvenience.Config;
 import dev.fealtous.minorconvenience.convenience.chat.ChatParser;
 import dev.fealtous.minorconvenience.utils.Location;
 import dev.fealtous.minorconvenience.utils.LocatorUtil;
+import dev.fealtous.minorconvenience.utils.render.RenderUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelTargetBundle;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.FramePassManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,30 +87,37 @@ public class DivanSolver {
             return (dist < Config.miningSens);
         }).collect(Collectors.toList());
     }
-// Need Framepass event
-//    @SubscribeEvent
-//    public static void renderPoint(RenderLevelStageEvent e) {
-//        if (!LocatorUtil.isIn(Location.DIVAN) || !initFlag) return;
-//        var item = mc.player.getMainHandItem().getDisplayName().getString();
-//        if (!item.contains("Detector") || solutionSet.isEmpty()) return;
-//        if (e.getStage().equals(RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS)) {
-//            var pose = e.getPoseStack();
-//            var camera = e.getCamera().getPosition();
-//            var buffers = mc.renderBuffers();
-//            var bufSource = buffers.bufferSource();
-//
-//            pose.pushPose();
-//            pose.translate(-camera.x, -camera.y, -camera.z);
-//            var matrix = pose.last().pose();
-//            for (Vec3 sol : solutionSet) {
-//                var consumer = bufSource.getBuffer(RenderType.lines());
-//                RenderUtils.definePoint(consumer, matrix, mc.player.position().add(0, .25, 0));
-//                RenderUtils.definePoint(consumer, matrix, center.add(sol).add(0,2,0));
-//                bufSource.endBatch();
-//            }
-//            pose.popPose();
-//        }
-//    }
+
+
+    public static final FramePassManager.PassDefinition divanSolver = new FramePassManager.PassDefinition() {
+        @Override
+        public void targets(LevelTargetBundle bundle, FramePass pass) {
+            bundle.main = pass.readsAndWrites(bundle.main);
+        }
+
+        @Override
+        public void executes() {
+            if (!LocatorUtil.isIn(Location.DIVAN) || !initFlag) return;
+            var item = mc.player.getMainHandItem().getDisplayName().getString();
+            if (!item.contains("Detector") || solutionSet.isEmpty()) return;
+            var pose = new PoseStack();
+            var camera = mc.gameRenderer.getMainCamera();
+            var buffers = mc.renderBuffers();
+            var bufSource = buffers.bufferSource();
+
+            pose.pushPose();
+            RenderUtils.renderRelativeToPlayer(pose, camera);
+            var matrix = pose.last().pose();
+            for (Vec3 sol : solutionSet) {
+                var consumer = bufSource.getBuffer(RenderType.lines());
+                RenderUtils.definePoint(consumer, matrix, mc.player.position().add(0, .25, 0));
+                RenderUtils.definePoint(consumer, matrix, center.add(sol).add(0,2,0));
+                bufSource.endBatch();
+            }
+            pose.popPose();
+        }
+    };
+
     public static void alert() {
         if (LocatorUtil.isIn(Location.DIVAN)) {
             if (!initFlag) init();
