@@ -1,6 +1,5 @@
 package dev.fealtous.minorconvenience;
 
-import com.mojang.logging.LogUtils;
 import dev.fealtous.minorconvenience.mining.MiningHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.ForgeConfigSpec;

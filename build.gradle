@@ -116,6 +116,9 @@ repositories {
         name = 'Minecraft libraries'
         url = 'https://libraries.minecraft.net'
     }
+
+    maven { url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1" }
+
     exclusiveContent {
         forRepository {
             maven {
@@ -147,6 +150,8 @@ dependencies {
     // to improve performance in production environments. This line is required to enable said compile-time validation
     // in your development environment, helping you catch issues early.
     annotationProcessor 'net.minecraftforge:eventbus-validator:7.0-beta.10'
+
+    runtimeOnly("me.djtheredstoner:DevAuth-${devauth_modulename}:${devauth_version}")
 
     // Example mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime

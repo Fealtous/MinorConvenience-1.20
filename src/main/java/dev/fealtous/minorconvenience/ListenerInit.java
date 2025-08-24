@@ -31,7 +31,7 @@ public class ListenerInit {
         ExperimentsHandler.init();
         ClientCommands.init();
         //MinecraftForge.EVENT_BUS.register(WaypointsHandler.class); // todo framepass or FLD
-        ConnectionStartEvent.BUS.addListener(InboundListener::onConnect); // todo determine wtf i'll do with this
+        ConnectionStartEvent.BUS.addListener(InboundListener::onConnect);
         AddFramePassEvent.BUS.addListener((evt) -> {
             evt.addPass(ResourceHelper.rl("divan_solver"), DivanSolver.divanSolver);
         });
